@@ -1,6 +1,7 @@
 //Using SDL, SDL_image, standard IO, and strings
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include <stdio.h>
 #include <string>
 #include <fstream>
@@ -22,7 +23,7 @@ bool init()
 
 	srand(time(NULL));
 
-	if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
 		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
 		success = false;
 	} else {
@@ -53,6 +54,11 @@ bool init()
 					success = false;
 				}
 
+				if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 ) {
+					printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
+					success = false;
+				}
+
 				//Initialize SDL_ttf
                 		if(TTF_Init() == -1)  {
                 			printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
@@ -74,6 +80,12 @@ void freeAll() {
 	gEnemy1Texture.free();
 	gBullet1.free(); 
 	gBullet2.free();
+	Mix_FreeMusic(gKozato);
+	gKozato = NULL;
+	Mix_FreeMusic(gGimn);
+	gGimn = NULL;
+	Mix_FreeMusic(gBattleSong);
+	gBattleSong = NULL;
 }
 
 void close() {
@@ -116,6 +128,8 @@ int main( int argc, char* args[] )
 					menuBuffer++;
 					renderMenuScreen();
 				} else {
+					if(Mix_PlayingMusic() == 0)
+						Mix_PlayMusic(gBattleSong, -1);
 					SDL_Rect backgroundColor; backgroundColor.x = 0; backgroundColor.y = 0; backgroundColor.w = SCREEN_WIDTH; backgroundColor.h = SCREEN_HEIGHT;
 					SDL_SetRenderDrawColor(gRenderer, 88, 99, 100, 255);
 					SDL_RenderFillRect(gRenderer, &backgroundColor);
@@ -123,6 +137,7 @@ int main( int argc, char* args[] )
 					background.render(camera);
 
 					if(reset) {
+						Mix_HaltMusic();
 						resetGame(&enemy1, &yenisei);
 						hildegarde.death = 0;
 						attackDirection = 0;

@@ -78,8 +78,10 @@ void Button::handleEvent( SDL_Event& e )
 {
 	if( e.type == SDL_KEYDOWN && e.key.repeat == 0 )
     	{
-		if(menuBuffer >= 15)
+		if(menuBuffer >= 15) {
         		inMenuScreen = 0;
+			Mix_HaltMusic();
+		}
 	}
 }
 
@@ -116,6 +118,8 @@ int getXthButton() {
 int menuTicks;
 void renderMenuScreen() {
 	menuTicks++;
+	if(Mix_PlayingMusic() == 0)
+		Mix_PlayMusic(gKozato, -1);
 	gTuvaMap.render(0, 0);
 	gText.loadFromRenderedText("Press any key to start", White, 0, gBattleFontSmall);
 	if(menuTicks > 30)

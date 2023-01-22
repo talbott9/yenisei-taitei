@@ -260,6 +260,8 @@ void Chara::moveToAcc(double x, double y, double speed, double acc) {
 
 void Chara::die() {
 	if(!didResetAnim) {
+		Mix_HaltMusic();
+		Mix_PlayMusic(gKhayan, -1);
 		resetAnim = 1; didResetAnim = 1;
 		rotateDown = 0; rotateUp = 0;
 		HGAttacking = 0;

@@ -17,6 +17,11 @@ SDL_Color White = {255, 255, 255};
 SDL_Color Grey = {200, 200, 255};
 SDL_Color Blue1 = {0, 105, 255};
 
+Mix_Music* gKozato = NULL;
+Mix_Music* gGimn = NULL;
+Mix_Music* gBattleSong = NULL;
+Mix_Music* gKhayan = NULL;
+
 //Texture wrapper class
 class LTexture
 {
