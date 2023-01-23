@@ -126,7 +126,6 @@ int main( int argc, char* args[] )
 	} else {
 		//Load media
 		loadFont(50);
-		
 		std::ifstream creditsFile;
 		creditsFile.open("credits");
 		if(!creditsFile.fail())
