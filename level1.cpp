@@ -39,7 +39,11 @@ bool loadMedia() {
 	if(!gTuvaMap.loadFromFile("resources/floor_tiles/tuvamap.png")) {
 	       printf("Failed to load map\n");
 	       success = false; 
-	}       
+	}      
+	if(!gGameOverScreen.loadFromFile("resources/floor_tiles/gameoverscreen.png"))
+		success = false;
+	if(!gGameOverScreen2.loadFromFile("resources/floor_tiles/gameoverscreen2.png"))
+		success = false;
 	TTF_Font* gFont = TTF_OpenFont("resources/fonts/font1.ttf", 20);
 	if(gFont == NULL) {
 		printf("Failed to load gFont! SDL_ttf Error: %s\n", TTF_GetError() );
@@ -197,6 +201,7 @@ void resetGame(Enemy* enemy, Chara* yenisei) {
 	yenisei->setPos(yenisei->defaultPosX, yenisei->defaultPosY);
 	yenisei->setVel(0, 0);
 	enemy->setVel(0,0);
+	enemy->restoreHP();
 	enemy->pattern = rand()%3;
 	enemy->changeMove = 1; enemy->actionTicks = 0;
 	yenisei->accTicks = 0; yenisei->deathTicks = 0;

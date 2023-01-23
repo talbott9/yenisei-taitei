@@ -12,10 +12,12 @@ SDL_Renderer* gRenderer = NULL;
 TTF_Font* gFont = NULL;
 TTF_Font* gBattleFont = NULL;
 TTF_Font* gBattleFontSmall = NULL;
+TTF_Font* gFancyFont = NULL;
 
 SDL_Color White = {255, 255, 255};
-SDL_Color Grey = {200, 200, 255};
+SDL_Color Grey = {100, 100, 155};
 SDL_Color Blue1 = {0, 105, 255};
+SDL_Color Black = {0, 0, 0};
 
 Mix_Music* gKozato = NULL;
 Mix_Music* gGimn = NULL;
@@ -69,7 +71,7 @@ class LTexture
 };
 
 LTexture gTextbox;
-LTexture gTuvaMap;
+LTexture gTuvaMap, gGameOverScreen, gGameOverScreen2;
 LTexture gYeniseiTexture;
 LTexture gHildegardeTexture;
 LTexture gHGArrow1Texture;

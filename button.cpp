@@ -15,39 +15,65 @@ bool inMenuScreen = 1;
 
 bool createdMessage;
 bool createdCredits;
+bool unlockedCredits;
+bool isCreditsScene;
+int creditsTicks; 
+bool speedUpCredits;
+bool finishedCredits;
 
 void loadFont(int size) {
 		gBattleFont= TTF_OpenFont("resources/fonts/battlefont.ttf", size);
 		gBattleFontSmall= TTF_OpenFont("resources/fonts/battlefont.ttf", 20);
 		gFont= TTF_OpenFont("resources/fonts/font1.ttf", 20);
+		gFancyFont = TTF_OpenFont("resources/fonts/Basic Roman-BoldItalic.ttf", 25);
 }
 
 int alphaTicks;
 SDL_Rect alphaSquare;
+bool isGameOverScreen;
+bool gameOverScreenSuccess;
 //std::string deathMessage[10] {"Doth bitter death separate thus?", "Is this the promised end? Or the image of that horror?" };
 void gameOverScreen() {
+	isGameOverScreen = 1;
 	if(actualScore >= 10000 && !createdMessage) {
-		createdMessage = 1;	
-		std::ofstream thanks("thanks");
-		thanks << "Thank you for playing!\nComments? 'alves967@yahoo.co.jp'.";
+		if(!createdMessage) {
+			createdMessage = 1;	
+			std::ofstream thanks("thanks");
+			thanks << "Thank you for playing!\nLeave comments to 'alves967@yahoo.co.jp'.";
+		}
 	}
-	if(actualScore >= 20000 && !createdCredits) {
-		createdCredits = 1;
-		std::ofstream credits("credits");
-		credits << "Programming: Henricus\nMusic (if there is any): Henricus\nArt: Henricus\n";
+	if(actualScore >= 20000) {
+		if(!createdCredits) {
+			std::ofstream credits("credits");
+			credits << "Programming: Henricus\nMusic (if there is any): Henricus\nArt: Henricus";
+			createdCredits = 1;
+		}
+		unlockedCredits = 1;
 	}
-	alphaSquare.w = SCREEN_WIDTH; alphaSquare.h = SCREEN_HEIGHT;
-	alphaSquare.x = camera.x; alphaSquare.y = camera.y;
-	if(alphaTicks < 100)
-		alphaTicks+=5;
-	SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);	
-	SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, alphaTicks);
-	SDL_RenderFillRect(gRenderer, &alphaSquare);
+	if(alphaTicks < 255)
+		alphaTicks+=15;
+	else
+		gameOverScreenSuccess = 1;
+	//SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);	
+	//SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, alphaTicks);
+	//SDL_RenderFillRect(gRenderer, &alphaSquare);
+	if(!unlockedCredits) {
+		gGameOverScreen.setBlendMode(SDL_BLENDMODE_BLEND);
+		gGameOverScreen.setAlpha(alphaTicks);
+		gGameOverScreen.render(0, 0);
+	} else {
+		gGameOverScreen2.setBlendMode(SDL_BLENDMODE_BLEND);
+		gGameOverScreen2.setAlpha(alphaTicks);
+		gGameOverScreen2.render(0, 0);
+	}
 	std::string s = "Score....." + std::to_string(actualScore);
-	gText.loadFromRenderedText(s, White, 0, gBattleFont);
+	gText.loadFromRenderedText(s, Grey, 0, gBattleFont);
 	gText.render(camera.w/4, camera.h/4);
-	gText1.loadFromRenderedText("Press 'x' to try again, 'q' to quit", White, 0, gFont);
-	gText1.render(camera.w/3, camera.h - camera.h/4);
+	if(!unlockedCredits)
+		gText1.loadFromRenderedText("Press 'x' to try again, 'q' to quit", White, 0, gFont);
+	else
+		gText1.loadFromRenderedText("Press 'x' to try again, 'q' to quit, 'c' for credits", White, 0, gFont);
+	gText1.render(camera.w/3, camera.h - 40);
 }
 
 void showScore() {
@@ -78,11 +104,19 @@ void Button::handleEvent( SDL_Event& e )
 {
 	if( e.type == SDL_KEYDOWN && e.key.repeat == 0 )
     	{
-		if(menuBuffer >= 15) {
+		if(menuBuffer >= 15 && !isCreditsScene) {
         		inMenuScreen = 0;
 			Mix_HaltMusic();
-		}
+		} 
 	}
+	if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_z && e.key.repeat == 0)
+		if(!finishedCredits) {
+			speedUpCredits = 1;
+		} else {
+			reset = 1; inMenuScreen = 1;
+		}
+	if(e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_z)
+		speedUpCredits = 0;
 }
 
 int getXthButton() {
@@ -126,4 +160,26 @@ void renderMenuScreen() {
 		gText.render(125, SCREEN_HEIGHT - SCREEN_HEIGHT/6 + 25);
 	if(menuTicks >= 60)
 		menuTicks = 0;
+}
+
+void creditsScene() {
+	if(!(creditsTicks >= 6000)) {
+		creditsTicks += 2;
+		if(speedUpCredits)
+			creditsTicks += 4;
+	} else {
+		finishedCredits = 1;
+	}
+	//printf("%i\n", creditsTicks);
+	isCreditsScene = 1;
+	gText.loadFromRenderedText(
+			"          Programming\n\n\n\n             Henricus\n\n\n\n\n\n"
+			"                Art    \n\n\n\n           Henricus\n\n\n\n\n\n"
+			"             Music   \n\n\n\n" 
+					     "\"Kozato\" by Henricus\n"
+			                     "\"Tachanka\" by the Russian Army\n"
+					     "\"Khayan\" by Vladimir Oidupaa
+					     "\"Men tyva men\" by Tuvan National Orchestra\n\n\n\n\n\n"
+			"                  Thanks for playing!", White, 0, gFancyFont);
+	gText.render(camera.w/2 - 200, camera.h + 150 - creditsTicks/4);
 }

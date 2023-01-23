@@ -86,6 +86,10 @@ void freeAll() {
 	gGimn = NULL;
 	Mix_FreeMusic(gBattleSong);
 	gBattleSong = NULL;
+	Mix_FreeMusic(gKhayan);
+	gKhayan = NULL;
+	gGameOverScreen.free();
+	gGameOverScreen2.free();
 }
 
 void close() {
@@ -101,6 +105,23 @@ void close() {
 	SDL_Quit();
 }
 
+//Augmented reset function. I couldn't find a better name for it
+void resetGamePlus() {
+	finishedCredits = 0;
+	speedUpCredits = 0;
+	Mix_HaltMusic();
+	isCreditsScene = 0;
+	creditsTicks = 0;
+	isGameOverScreen = 0;
+	gameOverScreenSuccess = 0;
+	alphaTicks = 0;
+	resetGame(&enemy1, &yenisei);
+	hildegarde.death = 0;
+	attackDirection = 0;
+	reset = 0;
+}
+
+
 int main( int argc, char* args[] )
 {
 	srand(time(NULL));
@@ -110,6 +131,7 @@ int main( int argc, char* args[] )
 	} else {
 		//Load media
 		loadFont(50);
+		unlockedCredits = 1;
 		if(!loadMedia()) {
 			printf( "Failed to load media!\n" );
 		}
@@ -125,9 +147,35 @@ int main( int argc, char* args[] )
 			//While application is running
 			while(!quit) {
 				if(inMenuScreen) {
+					if(reset)
+						resetGamePlus();
 					menuBuffer++;
 					renderMenuScreen();
+				} else if(isCreditsScene) {
+					if(reset)
+						resetGamePlus();
+					
+					if(Mix_PlayingMusic() == 0)
+						Mix_PlayMusic(gGimn, -1);
+					SDL_Rect backgroundColor; backgroundColor.x = 0; backgroundColor.y = 0; backgroundColor.w = SCREEN_WIDTH; backgroundColor.h = SCREEN_HEIGHT;
+					SDL_Rect shadeColor; shadeColor.x = 0; shadeColor.y = 0; shadeColor.w = SCREEN_WIDTH; shadeColor.h = SCREEN_HEIGHT;
+					SDL_SetRenderDrawColor(gRenderer, 255, 198, 104, 255);
+					SDL_RenderFillRect(gRenderer, &backgroundColor);
+
+					background.render(camera);
+					yenisei.move();
+					hildegarde.moveHG();
+					yenisei.render(camera, &gYeniseiTexture);
+					hildegarde.renderHG(camera, &gHildegardeTexture);
+					SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
+					SDL_SetRenderDrawColor(gRenderer, 0, 0,  0, 20);
+					SDL_RenderFillRect(gRenderer, &shadeColor);
+					creditsScene();
+
 				} else {
+					if(reset)
+						resetGamePlus();
+
 					if(Mix_PlayingMusic() == 0)
 						Mix_PlayMusic(gBattleSong, -1);
 					SDL_Rect backgroundColor; backgroundColor.x = 0; backgroundColor.y = 0; backgroundColor.w = SCREEN_WIDTH; backgroundColor.h = SCREEN_HEIGHT;
@@ -135,14 +183,6 @@ int main( int argc, char* args[] )
 					SDL_RenderFillRect(gRenderer, &backgroundColor);
 
 					background.render(camera);
-
-					if(reset) {
-						Mix_HaltMusic();
-						resetGame(&enemy1, &yenisei);
-						hildegarde.death = 0;
-						attackDirection = 0;
-						reset = 0;
-					}
 				
 					if(!hildegarde.death) {
 						yenisei.move();
@@ -154,7 +194,10 @@ int main( int argc, char* args[] )
 
 					yenisei.render(camera, &gYeniseiTexture);
 					hildegarde.renderHG(camera, &gHildegardeTexture);
-					enemy1.doThings(&projectile2, &projectile3, &projectile4, &hildegarde);
+					if(!gameOverScreenSuccess)
+						enemy1.doThings(&projectile2, &projectile3, &projectile4, &hildegarde);
+					if(isGameOverScreen)
+						gameOverScreen();	
 					if(!hildegarde.death)
 						showScore();
 
@@ -178,7 +221,7 @@ int main( int argc, char* args[] )
 							background.addXY(-100, 0);
 						}*/
 					}
-					if(!inMenuScreen)
+					if(!inMenuScreen && !isCreditsScene)
 						yenisei.handleEvent(e);
 					else
 						button.handleEvent(e);

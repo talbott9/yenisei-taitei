@@ -32,6 +32,8 @@ void Chara::handleEvent( SDL_Event& e ) {
 		} else {
 			if(e.key.keysym.sym == SDLK_x) {
 				reset = 1; mVelX = 0; hasPushedKey = 0; HGAttacking = 0;
+			} else if(e.key.keysym.sym == SDLK_c && unlockedCredits) {
+				reset = 1; isCreditsScene = 1;
 			}
 		}
 	}
@@ -281,7 +283,7 @@ void Chara::die() {
 		else {
 			//deathTicks = 0;
 			if(!reset)	
-				gameOverScreen();			
+				isGameOverScreen = 1;			
 		}
 	}					
 }
