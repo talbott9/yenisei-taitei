@@ -35,17 +35,23 @@ bool gameOverScreenSuccess;
 //std::string deathMessage[10] {"Doth bitter death separate thus?", "Is this the promised end? Or the image of that horror?" };
 void gameOverScreen() {
 	isGameOverScreen = 1;
-	if(actualScore >= 10000 && !createdMessage) {
+	/*if(actualScore >= 10000 && !createdMessage) {
 		if(!createdMessage) {
 			createdMessage = 1;	
 			std::ofstream thanks("thanks");
 			thanks << "Thank you for playing!\nLeave comments to 'alves967@yahoo.co.jp'.";
 		}
-	}
-	if(actualScore >= 20000) {
+	}*/
+	if(actualScore >= 15000) {
 		if(!createdCredits) {
 			std::ofstream credits("credits");
-			credits << "Programming: Henricus\nMusic (if there is any): Henricus\nArt: Henricus";
+			credits << "Programming: Henricus\n\n"
+				   "Art: Henricus\n\n"
+				   "Music: \"Kozato\" by Henricus\n" 
+				   "       \"Tachanka\"\n"
+				   "       \"Khayan\" by Vladimir Oyun Oidupaa\n"
+				   "       \"Men tyva men\" by the Tuvan National Orchestra\n\n" 
+				   "(C) 2023 alves967@yahoo.co.jp";
 			createdCredits = 1;
 		}
 		unlockedCredits = 1;
@@ -107,14 +113,16 @@ void Button::handleEvent( SDL_Event& e )
 		if(menuBuffer >= 15 && !isCreditsScene) {
         		inMenuScreen = 0;
 			Mix_HaltMusic();
+			gBattleSong = Mix_LoadMUS("resources/music/battlesong.ogg");
 		} 
 	}
-	if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_z && e.key.repeat == 0)
+	if(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_z && e.key.repeat == 0) {
 		if(!finishedCredits) {
 			speedUpCredits = 1;
 		} else {
 			reset = 1; inMenuScreen = 1;
 		}
+	}
 	if(e.type == SDL_KEYUP && e.key.keysym.sym == SDLK_z)
 		speedUpCredits = 0;
 }
@@ -152,8 +160,10 @@ int getXthButton() {
 int menuTicks;
 void renderMenuScreen() {
 	menuTicks++;
-	if(Mix_PlayingMusic() == 0)
+	if(Mix_PlayingMusic() == 0) {
+		gKozato = Mix_LoadMUS("resources/music/kozato.ogg");
 		Mix_PlayMusic(gKozato, -1);
+	}
 	gTuvaMap.render(0, 0);
 	gText.loadFromRenderedText("Press any key to start", White, 0, gBattleFontSmall);
 	if(menuTicks > 30)
@@ -172,14 +182,22 @@ void creditsScene() {
 	}
 	//printf("%i\n", creditsTicks);
 	isCreditsScene = 1;
+	int illust2y = camera.h + 250 - creditsTicks/4;
+	int illust1y = 0;
+	if(!(illust2y <= camera.y - 500)) {
+		gIllust2.render(camera.w/2 + 50, camera.h + 450 - creditsTicks/4);
+	}
+	if(!(illust1y <= camera.y - 400)) {
+		gIllust1.render(camera.w/2 - 150, camera.h + 1100 - creditsTicks/4);
+	}
 	gText.loadFromRenderedText(
 			"          Programming\n\n\n\n             Henricus\n\n\n\n\n\n"
 			"                Art    \n\n\n\n           Henricus\n\n\n\n\n\n"
 			"             Music   \n\n\n\n" 
 					     "\"Kozato\" by Henricus\n"
-			                     "\"Tachanka\" by the Russian Army\n"
-					     "\"Khayan\" by Vladimir Oidupaa
-					     "\"Men tyva men\" by Tuvan National Orchestra\n\n\n\n\n\n"
-			"                  Thanks for playing!", White, 0, gFancyFont);
+			                     "\"Tachanka\"\n"
+					     "\"Khayan\" by Vladimir Oidupaa\n"
+					     "\"Men Tyva Men\" by the Tuvan National Orchestra\n\n\n\n\n\n"
+			"                  Thank you for playing!", White, 0, gFancyFont);
 	gText.render(camera.w/2 - 200, camera.h + 150 - creditsTicks/4);
 }

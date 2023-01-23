@@ -4,20 +4,15 @@
 #include "enemy.cpp"
 #include "projectiles.cpp"
 
+// This file only exists because when I started programming this game
+// I didn't know how includes work. Might clean up later, but it works for now
+
 const int LEVEL_WIDTH = 1290;
 const int LEVEL_HEIGHT = 960;
 
 bool loadMedia() {
 	bool success = true;
 
-	gKozato = Mix_LoadMUS("resources/music/kozato.ogg");
-	if(gKozato == NULL) {
-		success = false;
-		printf("Failed to load music\n");
-	}
-	gGimn = Mix_LoadMUS("resources/music/gimn.ogg");
-	gBattleSong = Mix_LoadMUS("resources/music/battlesong.ogg");
-	gKhayan = Mix_LoadMUS("resources/music/khayan.ogg");
 	if(!gEnemy1Texture.loadFromFile("resources/enemies/enemy1.png"))
 		success = false;
 	if(!gLevel1Floor.loadFromFile("resources/floor_tiles/level1.png"))

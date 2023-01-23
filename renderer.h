@@ -71,7 +71,7 @@ class LTexture
 };
 
 LTexture gTextbox;
-LTexture gTuvaMap, gGameOverScreen, gGameOverScreen2;
+LTexture gTuvaMap, gGameOverScreen, gGameOverScreen2, gIllust1, gIllust2;
 LTexture gYeniseiTexture;
 LTexture gHildegardeTexture;
 LTexture gHGArrow1Texture;

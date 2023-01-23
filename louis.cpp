@@ -33,7 +33,8 @@ void Chara::handleEvent( SDL_Event& e ) {
 			if(e.key.keysym.sym == SDLK_x) {
 				reset = 1; mVelX = 0; hasPushedKey = 0; HGAttacking = 0;
 			} else if(e.key.keysym.sym == SDLK_c && unlockedCredits) {
-				reset = 1; isCreditsScene = 1;
+				reset = 1; 		
+				isCreditsScene = 1;
 			}
 		}
 	}
@@ -263,6 +264,7 @@ void Chara::moveToAcc(double x, double y, double speed, double acc) {
 void Chara::die() {
 	if(!didResetAnim) {
 		Mix_HaltMusic();
+		gKhayan = Mix_LoadMUS("resources/music/khayan.ogg");
 		Mix_PlayMusic(gKhayan, -1);
 		resetAnim = 1; didResetAnim = 1;
 		rotateDown = 0; rotateUp = 0;

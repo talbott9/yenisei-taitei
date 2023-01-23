@@ -74,12 +74,6 @@ void freeAll() {
 	//Free loaded images
 	gTextbox.free();
 	gTuvaMap.free();
-	gYeniseiTexture.free();
-	gHildegardeTexture.free();
-	gHGArrow1Texture.free();
-	gEnemy1Texture.free();
-	gBullet1.free(); 
-	gBullet2.free();
 	Mix_FreeMusic(gKozato);
 	gKozato = NULL;
 	Mix_FreeMusic(gGimn);
@@ -88,8 +82,8 @@ void freeAll() {
 	gBattleSong = NULL;
 	Mix_FreeMusic(gKhayan);
 	gKhayan = NULL;
-	gGameOverScreen.free();
-	gGameOverScreen2.free();
+	gIllust1.free();
+	gIllust2.free();
 }
 
 void close() {
@@ -107,6 +101,7 @@ void close() {
 
 //Augmented reset function. I couldn't find a better name for it
 void resetGamePlus() {
+	freeAll();
 	finishedCredits = 0;
 	speedUpCredits = 0;
 	Mix_HaltMusic();
@@ -131,7 +126,12 @@ int main( int argc, char* args[] )
 	} else {
 		//Load media
 		loadFont(50);
-		unlockedCredits = 1;
+		
+		std::ifstream creditsFile;
+		creditsFile.open("credits");
+		if(!creditsFile.fail())
+			unlockedCredits = 1;
+
 		if(!loadMedia()) {
 			printf( "Failed to load media!\n" );
 		}
@@ -147,16 +147,24 @@ int main( int argc, char* args[] )
 			//While application is running
 			while(!quit) {
 				if(inMenuScreen) {
-					if(reset)
+					if(reset) {
 						resetGamePlus();
+						gTuvaMap.loadFromFile("resources/floor_tiles/tuvamap.png");
+					}
+
 					menuBuffer++;
 					renderMenuScreen();
 				} else if(isCreditsScene) {
-					if(reset)
+					if(reset) {
 						resetGamePlus();
+						gGimn = Mix_LoadMUS("resources/music/gimn.ogg");
+						gIllust1.loadFromFile("resources/floor_tiles/illust1thanks.png");
+						gIllust2.loadFromFile("resources/floor_tiles/illust2.png");				
+					}
 					
-					if(Mix_PlayingMusic() == 0)
+					if(Mix_PlayingMusic() == 0) {
 						Mix_PlayMusic(gGimn, -1);
+					}
 					SDL_Rect backgroundColor; backgroundColor.x = 0; backgroundColor.y = 0; backgroundColor.w = SCREEN_WIDTH; backgroundColor.h = SCREEN_HEIGHT;
 					SDL_Rect shadeColor; shadeColor.x = 0; shadeColor.y = 0; shadeColor.w = SCREEN_WIDTH; shadeColor.h = SCREEN_HEIGHT;
 					SDL_SetRenderDrawColor(gRenderer, 255, 198, 104, 255);
@@ -173,8 +181,10 @@ int main( int argc, char* args[] )
 					creditsScene();
 
 				} else {
-					if(reset)
+					if(reset) {
 						resetGamePlus();
+						gBattleSong = Mix_LoadMUS("resources/music/battlesong.ogg");
+					}
 
 					if(Mix_PlayingMusic() == 0)
 						Mix_PlayMusic(gBattleSong, -1);
