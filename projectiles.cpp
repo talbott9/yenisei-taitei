@@ -468,6 +468,10 @@ void Projectile::shootEnemy4(double x, double y, Chara* hildegarde) {
 				projectiles3[2].mBox.x = projectiles3[2].posX;
 				projectiles3[2].mBox.y = projectiles3[2].posY;
 			}
+			for(int i = 0; i < 2; i++) {
+				if(checkCollision(projectiles3[i].mBox, hildegarde->getBox()))
+					hildegarde->death = 1;
+			}
 		} else {
 			for(int i = 0; i < 3; i++) {
 			projectiles3[i].posX = defaultPosX;
