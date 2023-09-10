@@ -1,5 +1,9 @@
 #include "enemy.h"
 
+
+Enemy enemy1;
+Enemy saucer;
+
 Enemy::Enemy() {
 	mBox.w = 107;
 	mBox.h = 97;
@@ -12,8 +16,8 @@ Enemy::Enemy() {
 	randX = posX; randY = SCREEN_HEIGHT/6;
 	mCurrentHitPoints = 100;
 	mMaxHitPoints = 100;
-	gEnemyTexture = &gEnemy1Texture;
-	enemyIdNumber = 0;
+	enemy1.set(&gEnemy1Texture, 0);
+	saucer.set(&gSaucerTexture, 1);
 }
 
 SDL_Rect Enemy::getBox() {
@@ -91,4 +95,6 @@ void Enemy::moveToXY(double x, double y, double speed) {
 		dx = 0; dy = 0;
 	}
 }
+
+
 

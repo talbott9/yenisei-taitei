@@ -2,8 +2,8 @@
 and may not be redistributed without written permission.*/
 
 //Using SDL, SDL_image, standard IO, and strings
-#include <SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string>
 
@@ -33,7 +33,7 @@ class Chara {
 		static const int HGDOT_WIDTH = 58;
 		static const int HGDOT_HEIGHT = 72;
 
-		double DOT_VEL = 5.0;
+		double DOT_VEL = 7.0;
 
 		Chara();
 

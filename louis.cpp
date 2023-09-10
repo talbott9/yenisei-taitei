@@ -8,8 +8,8 @@ Chara::Chara() {
     	defaultPosY = SCREEN_HEIGHT - 80.0;
 	posY = defaultPosY;
 	mBox.x = posX; mBox.y = posY;
-	mBox.w = 10;
-	mBox.h = 10;
+	mBox.w = 5;
+	mBox.h = 5;
 	
 	mVelX = 0; mVelXNP = 0;
 	mVelY = 0; mVelYNP = 0;

@@ -15,6 +15,8 @@ bool loadMedia() {
 
 	if(!gEnemy1Texture.loadFromFile("resources/enemies/enemy1.png"))
 		success = false;
+	if(!gSaucerTexture.loadFromFile("resources/enemies/saucer.png"))
+		success = false;
 	if(!gLevel1Floor.loadFromFile("resources/floor_tiles/level1.png"))
 		success = false;
 	if(!gLevel1Background.loadFromFile("resources/floor_tiles/level1background.png"))
@@ -22,6 +24,8 @@ bool loadMedia() {
 	if(!gBullet1.loadFromFile("resources/projectiles/bullet1.png"))
 		success = false;
 	if(!gBullet2.loadFromFile("resources/projectiles/bullet2.png"))
+		success = false;
+	if(!gSaucerBullet.loadFromFile("resources/projectiles/saucerbullet.png"))
 		success = false;
 	if(!gYeniseiTexture.loadFromFile("resources/yenisei/yeniseisprites.png"))	{
 		printf( "Failed to load texture!\n" );
@@ -98,110 +102,160 @@ bool loadMedia() {
 	return success;
 }
 
+void Enemy::reset() {
+  lastPattern = pattern;
+  enemyDead = 0;
+  randX = rand()%(SCREEN_WIDTH - mBox.w) + mBox.w;
+  randY = rand()%(SCREEN_HEIGHT - 300);
+  while(pattern == lastPattern)
+    pattern = rand()%4;
+  changeMove = 1; actionTicks = 0;
+  renderAngle = 0;
+  actualScore += 1000;
+  if(actualScore == 3000)
+    difficulty++;
+  else if(actualScore == 6000)
+    difficulty++;
+  mCurrentHitPoints = mMaxHitPoints;
+}
+
 void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde) {
-	gEnemyTexture->render(mBox.x, mBox.y, NULL, renderAngle);
-	actionTicks++;
-	//printf("%i\n", mCurrentHitPoints);
-	if(actionTicks >= 1800 || enemyDead) {
-		dx = 0; dy = 0;
-		renderAngle += 30.0;
-		if(renderAngle >= 720) {
-			if(pattern == 0)
-				projectile1->clearProjectiles();
-			else if(pattern == 1) {
-				projectile2->clearProjectiles();
-				projectile2->clearProjectiles1();
-			}
-			else if (pattern == 3) {
-				projectile2->clearProjectiles();
-				projectile2->clearProjectiles1();
-			}
-			else if(pattern == 2)
-				projectile3->clearProjectiles();
-			enemyDead = 0;
-			randX = rand()%(SCREEN_WIDTH - mBox.w) + mBox.w;
-			randY = rand()%(SCREEN_HEIGHT - 300);
-			pattern = rand()%4;
-			changeMove = 1; actionTicks = 0;
-			renderAngle = 0;
-			if(!hildegarde->death)
-				actualScore += 1000;
-			if(actualScore == 5000)
-				difficulty++;
-			else if(actualScore == 10000)
-				difficulty++;
-			mCurrentHitPoints = mMaxHitPoints;
-		}
-	} else {
-		switch(pattern) {
-			case 0:	if(difficulty == 0)
-					moveThreshold = 180;
-				else if(difficulty == 1)
-					moveThreshold = 120;
-				else if(difficulty == 2)
-					moveThreshold = 60;
-				if(actionTicks % moveThreshold == 0) {
-					changeMove = 1;
-					randX = rand()%(SCREEN_WIDTH - mBox.w) + mBox.w;
-					randY = rand()%(SCREEN_HEIGHT - 300);
-				}
-				moveToXY(randX, randY, 6.0);
-				projectile1->shootEnemy1(mBox.x, mBox.y + mBox.h/2, hildegarde);
-				projectile1->checkDie(hildegarde);
-				break;
-			case 1: moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
-				 projectile2->shootEnemy2(mBox.x, mBox.y + mBox.h/2, hildegarde); 
-				projectile2->checkDie(hildegarde);
-				projectile2->checkDie1(hildegarde);
-				break;
-			case 2: moveToXY(SCREEN_WIDTH/2 - mBox.w/2, SCREEN_HEIGHT/2, 6.0);
-				 projectile3->shootEnemy3(mBox.x, mBox.y + mBox.h/2, hildegarde);
-				projectile3->checkDie(hildegarde);
-				break;
-			default: moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
-				 if(fabs(mBox.x - (SCREEN_WIDTH/2 - mBox.w/2)) < 100) {
-				 	projectile2->shootEnemy4(mBox.x, mBox.y + mBox.h/2, hildegarde);
-				 	projectile2->checkDie(hildegarde);
-				 	projectile2->checkDie(hildegarde);
-				 }
-				 break;
-		}
+  enemyIDGlobal = enemyID;
+  gEnemyTexture->render(mBox.x, mBox.y, NULL, renderAngle);
+  actionTicks++;
+  pattern = 1;
+  if(enemyDead) {
+    dx = 0; dy = 0;
+    renderAngle += 30.0;
+    if(renderAngle >= 720) {
+      if(pattern == 0)
+	projectile1->clearProjectiles();
+      else if(pattern == 1) {
+	projectile2->clearProjectiles();
+	projectile2->clearProjectiles1();
+      }
+      else if (pattern == 3) {
+	projectile2->clearProjectiles();
+	projectile2->clearProjectiles1();
+      }
+      else if(pattern == 2)
+	projectile3->clearProjectiles();
+      reset();
+    }
+  } else {
+    switch(enemyID) {
+    case 0:
+      switch(pattern) {
+      case 0:	if(difficulty == 0)
+	  moveThreshold = 180;
+	else if(difficulty == 1)
+	  moveThreshold = 120;
+	else
+	  moveThreshold = 60;
+	if(actionTicks % moveThreshold == 0) {
+	  changeMove = 1;
+	  randX = rand()%(SCREEN_WIDTH - mBox.w) + mBox.w;
+	  randY = rand()%(SCREEN_HEIGHT - 300);
 	}
-	//printf("%i/%i\n", randX, randY);
+	moveToXY(randX, randY, 6.0);
+	projectile1->shootEnemy1(mBox.x, mBox.y + mBox.h/2, hildegarde);
+	projectile1->checkDie(hildegarde);
+	break;
+      case 1: moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
+	projectile2->shootEnemy2(mBox.x, mBox.y + mBox.h/2, hildegarde); 
+	projectile2->checkDie(hildegarde);
+	projectile2->checkDie1(hildegarde);
+	break;
+      case 2: moveToXY(SCREEN_WIDTH/2 - mBox.w/2, SCREEN_HEIGHT/2, 6.0);
+	projectile3->shootEnemy3(mBox.x, mBox.y + mBox.h/2, hildegarde);
+	projectile3->checkDie(hildegarde);
+	break;
+      default: moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
+	if(fabs(mBox.x - (SCREEN_WIDTH/2 - mBox.w/2)) < 100) {
+	  projectile2->shootEnemy4(mBox.x, mBox.y + mBox.h/2, hildegarde);
+	  projectile2->checkDie(hildegarde);
+	  projectile2->checkDie(hildegarde);
+	}
+	break;
+      }
+    case 1: switch(pattern) {
+      case 0: moveThreshold = 60;
+	if(actionTicks % moveThreshold == 0) {
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 300);
+	  randX = hildegarde->getBox().x - mBox.w/2;
+	}
+	moveToXY(randX, randY, 8.0);
+	projectile1->shootEnemy4(mBox.x + 50, mBox.y + 20 + mBox.h/2, hildegarde);
+	projectile2->shootEnemy3(rand()%SCREEN_WIDTH, 0, hildegarde);
+	break;
+      case 1: moveThreshold = 90;
+	if(actionTicks % moveThreshold == 0) {
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT/5);
+	  randX = rand()%(SCREEN_WIDTH - mBox.w) + mBox.w;randX = hildegarde->getBox().x - mBox.w/2;
+	}
+	moveToXY(randX, randY, 8.0);
+	projectile2->shootEnemy0(0, 0, hildegarde, 0);
+	//projectile2->shootEnemy0(SCREEN_WIDTH, 0, hildegarde, 0);
+	break;
+      }
+      break;
+    }
+    //printf("%i/%i\n", randX, randY);
+  }
 }
 
 void Chara::shoot(Projectile* projectile, Enemy* enemy) {
-	//if(HGAttacking && projectile->getActiveProjectiles() < NUM_PROJECTILES)
-	//	projectile->addProjectiles();
-	//else
-	//	//projectile->resetProjectiles();
-	projectile->shootHG(mBox.x, mBox.y, enemy);
+  //if(HGAttacking && projectile->getActiveProjectiles() < NUM_PROJECTILES)
+  //	projectile->addProjectiles();
+  //else
+  //	//projectile->resetProjectiles();
+  projectile->shootHG(mBox.x, mBox.y, enemy);
 }
 
 void resetGame(Enemy* enemy, Chara* yenisei) {
-	if(enemy->pattern == 0)
-		projectile1.clearProjectiles();
-	else if(enemy->pattern == 1) {
-		projectile2.clearProjectiles();
-		projectile2.clearProjectiles1();
-	}
-	else if(enemy->pattern == 3) {
-		projectile3.clearProjectiles();
-		projectile3.clearProjectiles1();
-	}
-	else if(enemy->pattern == 2)
-		projectile4.clearProjectiles();
-	projectile1.clearProjectilesHG();
-	enemy->setPosXY(enemy->defaultPosX, enemy->defaultPosY);
-	yenisei->setPos(yenisei->defaultPosX, yenisei->defaultPosY);
-	yenisei->setVel(0, 0);
-	enemy->setVel(0,0);
-	enemy->restoreHP();
-	enemy->pattern = rand()%3;
-	enemy->changeMove = 1; enemy->actionTicks = 0;
-	yenisei->accTicks = 0; yenisei->deathTicks = 0;
-	yenisei->moved = 0; yenisei->didResetAnim = 0;
-	yenisei->resetAnim = 0; HGAttacking = 0;
-	actualScore = 0; score = 0;
-	difficulty = 0;
+  if(enemy->pattern == 0)
+    projectile1.clearProjectiles();
+  else if(enemy->pattern == 1) {
+    switch(enemy->enemyID) {
+    case 0:
+      projectile2.clearProjectiles();
+      projectile2.clearProjectiles1();
+      break;
+    case 1:
+      for(int i = 0; i < NUM_PROJECTILES; i++)
+	projectiles2[i].clearProjectilesPlus();
+      projectile3.clearProjectilesPlus();
+      break;
+    }
+  }
+  else if(enemy->pattern == 3) {
+    switch(enemy->enemyID) {
+    case 0:
+      projectile3.clearProjectiles();
+      projectile3.clearProjectiles1();
+      break;
+    case 1:
+      for(int i = 0; i < NUM_PROJECTILES; i++)
+	projectiles2[i].clearProjectilesPlus();
+      projectile3.clearProjectilesPlus();
+      break;
+    }
+  }
+  else if(enemy->pattern == 2)
+    projectile4.clearProjectiles();
+  projectile1.clearProjectilesHG();
+  enemy->setPosXY(enemy->defaultPosX, enemy->defaultPosY);
+  yenisei->setPos(yenisei->defaultPosX, yenisei->defaultPosY);
+  yenisei->setVel(0, 0);
+  enemy->setVel(0,0);
+  enemy->restoreHP();
+  enemy->pattern = rand()%3;
+  enemy->changeMove = 1; enemy->actionTicks = 0;
+  yenisei->accTicks = 0; yenisei->deathTicks = 0;
+  yenisei->moved = 0; yenisei->didResetAnim = 0;
+  yenisei->resetAnim = 0; HGAttacking = 0;
+  actualScore = 0; score = 0;
+  difficulty = 0;
 }
