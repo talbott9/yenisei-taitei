@@ -3,55 +3,55 @@
 #include "button.cpp"
 
 Chara::Chara() {
-	defaultPosX = DOT_WIDTH;
-	posX = defaultPosX;
-    	defaultPosY = SCREEN_HEIGHT - 80.0;
-	posY = defaultPosY;
-	mBox.x = posX; mBox.y = posY;
-	mBox.w = 5;
-	mBox.h = 5;
+  defaultPosX = DOT_WIDTH;
+  posX = defaultPosX;
+  defaultPosY = SCREEN_HEIGHT - 80.0;
+  posY = defaultPosY;
+  mBox.x = posX; mBox.y = posY;
+  mBox.w = 9;
+  mBox.h = 9;
 	
-	mVelX = 0; mVelXNP = 0;
-	mVelY = 0; mVelYNP = 0;
+  mVelX = 0; mVelXNP = 0;
+  mVelY = 0; mVelYNP = 0;
 
-	resetAnim = 0; 
+  resetAnim = 0; 
 }
 bool hasPushedKey;
 //Handles movement & attack
 void Chara::handleEvent( SDL_Event& e ) {
-	if(e.type == SDL_KEYDOWN && e.key.repeat == 0) {
-		if(!hildegarde.death) {
-			switch(e.key.keysym.sym) {
-	    			case SDLK_UP: rotateDown = 1; break;
-	    			case SDLK_DOWN: rotateUp = 1; break;
-            			case SDLK_LEFT: mVelX -= DOT_VEL; hasPushedKey = 1; resetAnim = 1; break;
-	    			case SDLK_RIGHT: mVelX += DOT_VEL; hasPushedKey = 1; resetAnim = 1; break;
-				case SDLK_z: if(attackDirection != 0)
-						 HGAttacking = 1; break;
-			}
-		} else {
-			if(e.key.keysym.sym == SDLK_x) {
-				reset = 1; mVelX = 0; hasPushedKey = 0; HGAttacking = 0;
-			} else if(e.key.keysym.sym == SDLK_c && unlockedCredits) {
-				reset = 1; 		
-				isCreditsScene = 1;
-			}
-		}
-	}
-    //If a key was released
-    else if(e.type == SDL_KEYUP && e.key.repeat == 0) {
-	    if(!hildegarde.death) {
-		    switch(e.key.keysym.sym) {
-			    case SDLK_UP: attackDirectionTicks = 0; rotateDown = 0; break;
-			    case SDLK_DOWN: attackDirectionTicks = 0; rotateUp = 0; break;
-			    case SDLK_LEFT: if(hasPushedKey)
-						    mVelX += DOT_VEL; break;
-			    case SDLK_RIGHT: if(hasPushedKey)
-						     mVelX -= DOT_VEL; break;
-			    case SDLK_z: HGAttacking = 0; break;
-		    }
-	    }
-    }
+  if(e.type == SDL_KEYDOWN && e.key.repeat == 0) {
+    //if(!hildegarde.death) {
+      switch(e.key.keysym.sym) {
+      case SDLK_UP: rotateDown = 1; break;
+      case SDLK_DOWN: rotateUp = 1; break;
+      case SDLK_LEFT: moveLeft = true;
+	resetAnim = 1; break;
+      case SDLK_RIGHT: moveRight = true;
+	resetAnim = 1; break;
+      case SDLK_z: if(attackDirection != 0)
+	  HGAttacking = 1; break;
+      }
+      //} else {
+      if(hildegarde.death && e.key.keysym.sym == SDLK_x) {
+	reset = 1; mVelX = 0; HGAttacking = 0;
+      } else if(e.key.keysym.sym == SDLK_c && unlockedCredits) {
+	reset = 1; 		
+	isCreditsScene = 1;
+      }
+      //}
+  }
+  //If a key was released
+  if(e.type == SDL_KEYUP && e.key.repeat == 0) {
+    //if(!hildegarde.death) {
+      switch(e.key.keysym.sym) {
+      case SDLK_UP: attackDirectionTicks = 0; rotateDown = 0; break;
+      case SDLK_DOWN: attackDirectionTicks = 0; rotateUp = 0; break;
+      case SDLK_LEFT: moveLeft = false; break;
+      case SDLK_RIGHT: moveRight = false; break;
+      case SDLK_z: HGAttacking = 0; break;
+      }
+      //}
+  }
 }
 
 
@@ -150,39 +150,35 @@ void Chara::renderHG(SDL_Rect& camera, LTexture* gSpriteSheetTexture) {
 	else
 		animWobble = 0;
 	gSpriteSheetTexture->render(mBox.x - camera.x - HGDOT_WIDTH/2 + 5, mBox.y - camera.y - HGDOT_HEIGHT/2 - 20 - animWobble + 25, currentClip);
+	    SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
+    SDL_Rect box = mBox; 
+    SDL_RenderFillRect(gRenderer, &box);
 
 }
 
 void Chara::move() {
-    //Move the dot left or right
-    posX += mVelX;
-    //If the dot went too far to the left or right
-    if((posX - 20 < 0) || (posX > SCREEN_WIDTH)) {
-        //Move back
-        posX -= mVelX;
+  if(!hildegarde.death) {
+    mVelX = DOT_VEL;
+    if(moveRight) {
+      posX += mVelX;
+      if(posX > SCREEN_WIDTH) {
+	posX -= mVelX;
+      }
+      mBox.x = posX;
     }
-    mBox.x = posX;
-
-    //Move the dot up or down
-    //mBox.y += mVelY;
-
-    //If the dot went too far up or down
-    //if((mBox.y < 0) || (mBox.y > SCREEN_HEIGHT)) {
-        //Move back
-     //   mBox.y -= mVelY;
-    //}
+    if(moveLeft) {
+      posX -= mVelX;
+      if(posX - 20 < 0) {
+	posX += mVelX;
+      }
+      mBox.x = posX;
+    }
+  }
 }
 
 void Chara::moveHG() {
-	posX = yenisei.posX - 15.0;
-	mBox.x = posX;
-	//if((yenisei.getBox().x <= 0) || (yenisei.getBox().x >= SCREEN_WIDTH)) {
-        //	mBox.x -= yenisei.getVelX();
-	//}
-	//mBox.y += mVelY;
-    	//if((louis.getBox().y < 0) || (mBox.y > SCREEN_HEIGHT)) {
-	//	mBox.y -= mVelY;
-	//}
+  posX = yenisei.posX - 15.0;
+  mBox.x = posX;
 }
 
 double Chara::getX(double x) {

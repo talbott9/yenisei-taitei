@@ -120,7 +120,7 @@ void play(int levelID) {
   //Main loop flag
       bool quit = false;
 
-      //Event handler
+      //Event handler;
       SDL_Event e;
 
       hildegarde.setPos(yenisei.getBox().x - 15, yenisei.getBox().y - 25);
@@ -187,7 +187,7 @@ void play(int levelID) {
 				
 	  if(!hildegarde.death) {
 	    yenisei.move();
-	    hildegarde.shoot(&projectile1, &enemy);
+	    hildegarde.shoot(&projectileHG, &enemy);
 	  }
 	  else
 	    yenisei.die();
@@ -223,10 +223,9 @@ void play(int levelID) {
 	      background.addXY(-100, 0);
 	      }*/
 	  }
-	  if(!inMenuScreen && !isCreditsScene)
 	    yenisei.handleEvent(e);
-	  else
-	    button.handleEvent(e);
+	    if(inMenuScreen || isCreditsScene)
+	      button.handleEvent(e);
 
 	}
 

@@ -1,5 +1,5 @@
 /*This source code copyrighted by Lazy Foo' Productions (2004-2022)
-and may not be redistributed without written permission.*/
+  and may not be redistributed without written permission.*/
 
 //Using SDL, SDL_image, standard IO, and strings
 #include <SDL2/SDL.h>
@@ -27,46 +27,50 @@ class LTexture;
 class Projectile;
 
 class Chara {
-    public:
-		static const int DOT_WIDTH = 150;
-		static const int DOT_HEIGHT = 103;
-		static const int HGDOT_WIDTH = 58;
-		static const int HGDOT_HEIGHT = 72;
+public:
+  static const int DOT_WIDTH = 150;
+  static const int DOT_HEIGHT = 103;
+  static const int HGDOT_WIDTH = 58;
+  static const int HGDOT_HEIGHT = 72;
 
-		double DOT_VEL = 7.0;
+  double DOT_VEL = 7.0;
 
-		Chara();
+  Chara();
 
-		void handleEvent( SDL_Event& e );
+  void handleEvent( SDL_Event& e );
 
-		void move();
-		void moveHG();
+  void move();
+  void moveHG();
 
-		SDL_Rect getBox();
-		double getX(double x), getY(double y);
-		int getVelX(); int getVelY();
+  SDL_Rect getBox();
+  double getX(double x), getY(double y);
+  int getVelX(); int getVelY();
 
-		void render(SDL_Rect& camera, LTexture* gSpriteSheetTexture);
-		void renderHG(SDL_Rect& camera, LTexture* gSpriteSheetTexture);
+  void render(SDL_Rect& camera, LTexture* gSpriteSheetTexture);
+  void renderHG(SDL_Rect& camera, LTexture* gSpriteSheetTexture);
 
-		int count = 0;
-		void setState(int x);
-		void setPos(int x, int y);
-		void setVel(double dx, double dy);
-		bool resetAnim; bool didResetAnim;
-		int animWobble;
-		void shoot(Projectile* projectile, Enemy* enemy);
-		bool death; void die();
-		bool moved; int deathTicks;
-		void moveToXY(double x, double y, double speed);
-		double distance; bool changeMove;
-		void moveToAcc(double x, double y, double speed, double acc);
-		int accTicks;
-		double defaultPosX, defaultPosY;
-    private:
-		SDL_Rect mBox;
-		double posX, posY;
-		double mVelX, mVelY; int mVelXNP, mVelYNP;
+  int count = 0;
+  void setState(int x);
+  void setPos(int x, int y);
+  void setVel(double dx, double dy);
+  bool resetAnim; bool didResetAnim;
+  bool moveUp, moveDown, moveLeft, moveRight;
+  bool gracePeriod;
+  int graceTicks;
+  
+  int animWobble;
+  void shoot(Projectile* projectile, Enemy* enemy);
+  bool death; void die();
+  bool moved; int deathTicks;
+  void moveToXY(double x, double y, double speed);
+  double distance; bool changeMove;
+  void moveToAcc(double x, double y, double speed, double acc);
+  int accTicks;
+  double defaultPosX, defaultPosY;
+private:
+  SDL_Rect mBox;
+  double posX, posY;
+  double mVelX, mVelY; int mVelXNP, mVelYNP;
 };
 
 Chara yenisei;

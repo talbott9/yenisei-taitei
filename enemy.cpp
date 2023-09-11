@@ -42,12 +42,12 @@ void Enemy::setVel(double x, double y) {
 }
 
 void Enemy::takeDamage() {
-	if(mCurrentHitPoints -  1 <= 0) {
+	if(mCurrentHitPoints - 2 <= 0) {
 		enemyDead = 1;
 		mCurrentHitPoints = mMaxHitPoints;
 	}
 	else
-		mCurrentHitPoints--;
+		mCurrentHitPoints -= 2;
 }
 
 void Enemy::moveToXY(double x, double y, double speed) {

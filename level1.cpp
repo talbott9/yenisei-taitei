@@ -10,6 +10,8 @@
 const int LEVEL_WIDTH = 1290;
 const int LEVEL_HEIGHT = 960;
 
+void clearAllProjectiles(bool clearPlayerProjectiles = false);
+
 bool loadMedia() {
 	bool success = true;
 
@@ -117,6 +119,7 @@ void Enemy::reset() {
   else if(actualScore == 6000)
     difficulty++;
   mCurrentHitPoints = mMaxHitPoints;
+  clearAllProjectiles();
 }
 
 void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde) {
@@ -128,18 +131,6 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
     dx = 0; dy = 0;
     renderAngle += 30.0;
     if(renderAngle >= 720) {
-      if(pattern == 0)
-	projectile1->clearProjectiles();
-      else if(pattern == 1) {
-	projectile2->clearProjectiles();
-	projectile2->clearProjectiles1();
-      }
-      else if (pattern == 3) {
-	projectile2->clearProjectiles();
-	projectile2->clearProjectiles1();
-      }
-      else if(pattern == 2)
-	projectile3->clearProjectiles();
       reset();
     }
   } else {
@@ -193,11 +184,15 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	if(actionTicks % moveThreshold == 0) {
 	  changeMove = 1;
 	  randY = rand()%(SCREEN_HEIGHT/5);
-	  randX = rand()%(SCREEN_WIDTH - mBox.w) + mBox.w;randX = hildegarde->getBox().x - mBox.w/2;
+	  randX = hildegarde->getBox().x - mBox.w/2 - rand()%200 + rand()%200;
+	  if(randX < 0)
+	    randX = 0;
+	  else if(randX > SCREEN_WIDTH - mBox.w)
+	    randX = SCREEN_WIDTH - mBox.w;
 	}
 	moveToXY(randX, randY, 8.0);
-	projectile2->shootEnemy0(0, 0, hildegarde, 0);
-	//projectile2->shootEnemy0(SCREEN_WIDTH, 0, hildegarde, 0);
+        projectile2->shootEnemy0(0, 0, hildegarde, 12, 90.0, 9, 10.0);
+	//projectile3->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, 40, &saucerProjectiles[NUM_PROJECTILES], 360.0, 20);
 	break;
       }
       break;
@@ -211,41 +206,22 @@ void Chara::shoot(Projectile* projectile, Enemy* enemy) {
   //	projectile->addProjectiles();
   //else
   //	//projectile->resetProjectiles();
-  projectile->shootHG(mBox.x, mBox.y, enemy);
+  //projectile->shootHG(mBox.x, mBox.y, enemy, &projectilesHG[NUM_PROJECTILES]);
+}
+
+void clearAllProjectiles(bool clearPlayerProjectiles) {
+  projectile2.clearProjectilesPlus();
+  projectile2.destroyProjs();
+  projectile3.clearProjectilesPlus();
+  projectile4.clearProjectilesPlus();
+  projectile5.clearProjectilesPlus();
+  saucerProjectile.clearProjectilesPlus();
+  if(clearPlayerProjectiles)
+    projectileHG.clearProjectilesPlus();
 }
 
 void resetGame(Enemy* enemy, Chara* yenisei) {
-  if(enemy->pattern == 0)
-    projectile1.clearProjectiles();
-  else if(enemy->pattern == 1) {
-    switch(enemy->enemyID) {
-    case 0:
-      projectile2.clearProjectiles();
-      projectile2.clearProjectiles1();
-      break;
-    case 1:
-      for(int i = 0; i < NUM_PROJECTILES; i++)
-	projectiles2[i].clearProjectilesPlus();
-      projectile3.clearProjectilesPlus();
-      break;
-    }
-  }
-  else if(enemy->pattern == 3) {
-    switch(enemy->enemyID) {
-    case 0:
-      projectile3.clearProjectiles();
-      projectile3.clearProjectiles1();
-      break;
-    case 1:
-      for(int i = 0; i < NUM_PROJECTILES; i++)
-	projectiles2[i].clearProjectilesPlus();
-      projectile3.clearProjectilesPlus();
-      break;
-    }
-  }
-  else if(enemy->pattern == 2)
-    projectile4.clearProjectiles();
-  projectile1.clearProjectilesHG();
+  clearAllProjectiles(true);
   enemy->setPosXY(enemy->defaultPosX, enemy->defaultPosY);
   yenisei->setPos(yenisei->defaultPosX, yenisei->defaultPosY);
   yenisei->setVel(0, 0);
