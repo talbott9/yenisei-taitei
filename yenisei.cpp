@@ -33,7 +33,7 @@ bool init()
     }
 
     //Create window
-    gWindow = SDL_CreateWindow("Yenisei", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    gWindow = SDL_CreateWindow("Thing", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if(gWindow == NULL) {
       printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
       success = false;
@@ -125,10 +125,10 @@ void play(int levelID) {
 
       hildegarde.setPos(yenisei.getBox().x - 15, yenisei.getBox().y - 25);
       Enemy enemy = enemy1;
-      Projectile proj1, proj2, proj3;
+      Projectile proj1, proj2, proj3, proj4;
       switch(levelID) {
       case 0: enemy = enemy1; proj1 = projectile2; proj2 = projectile3; proj3 = projectile4; break;
-      case 1: enemy = saucer; proj1 = saucerProjectile; proj2 = projectile2; proj3 = projectile3; break;
+      case 1: enemy = saucer; proj1 = saucerProjectile; proj2 = projectile2; proj3 = projectile3; proj4 = starProjectile1; break;
       }
 
       //While application is running
@@ -196,7 +196,7 @@ void play(int levelID) {
 	  yenisei.render(camera, &gYeniseiTexture);
 	  hildegarde.renderHG(camera, &gHildegardeTexture);
 	  if(!gameOverScreenSuccess) 
-	    enemy.doThings(&proj1, &proj2, &proj3, &hildegarde);
+	    enemy.doThings(&proj1, &proj2, &proj3, &hildegarde, &proj4);
 	  
 	  if(isGameOverScreen)
 	    gameOverScreen();	
@@ -204,6 +204,8 @@ void play(int levelID) {
 	    showScore();
 
 	}
+
+	clearBullets = 0;
 
 				
 	//Handle events on queue

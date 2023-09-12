@@ -87,8 +87,10 @@ void Enemy::moveToXY(double x, double y, double speed) {
 		dy *= speedMod;
 		posX += dx; posY += dy;
 		mBox.x = posX; mBox.y = posY;
-		dx /= speedMod;
-		dy /= speedMod;
+		if(speedMod != 0) {
+		  dx /= speedMod;
+		  dy /= speedMod;
+		}
 		//printf("%g/%g/%g/%g/%g/%g/%g/%g\n", distanceX, distanceY, distance, speedMod, dx, dy, x, y);
 	} else {
 		posX = x; posY = y;

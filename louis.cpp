@@ -150,9 +150,9 @@ void Chara::renderHG(SDL_Rect& camera, LTexture* gSpriteSheetTexture) {
 	else
 		animWobble = 0;
 	gSpriteSheetTexture->render(mBox.x - camera.x - HGDOT_WIDTH/2 + 5, mBox.y - camera.y - HGDOT_HEIGHT/2 - 20 - animWobble + 25, currentClip);
-	    SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
-    SDL_Rect box = mBox; 
-    SDL_RenderFillRect(gRenderer, &box);
+	/*SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
+	SDL_Rect box = mBox; 
+	SDL_RenderFillRect(gRenderer, &box);*/
 
 }
 

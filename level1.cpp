@@ -29,6 +29,8 @@ bool loadMedia() {
 		success = false;
 	if(!gSaucerBullet.loadFromFile("resources/projectiles/saucerbullet.png"))
 		success = false;
+	if(!gStarBullet1.loadFromFile("resources/projectiles/starbullet1.png"))
+		success = false;
 	if(!gYeniseiTexture.loadFromFile("resources/yenisei/yeniseisprites.png"))	{
 		printf( "Failed to load texture!\n" );
 		success = false;
@@ -122,22 +124,17 @@ void Enemy::reset() {
   clearAllProjectiles();
 }
 
-void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde) {
+void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde, Projectile* projectile4) {
   enemyIDGlobal = enemyID;
   gEnemyTexture->render(mBox.x, mBox.y, NULL, renderAngle);
   actionTicks++;
-  pattern = 1;
-  if(enemyDead) {
-    dx = 0; dy = 0;
-    renderAngle += 30.0;
-    if(renderAngle >= 720) {
-      reset();
-    }
-  } else {
-    switch(enemyID) {
+  pattern = 0;
+  switch(enemyID) { // 0 - conrad, 1 - saucer
+  case 0:
+    switch(pattern) {
     case 0:
-      switch(pattern) {
-      case 0:	if(difficulty == 0)
+      if(!enemyDead) {
+	if(difficulty == 0)
 	  moveThreshold = 180;
 	else if(difficulty == 1)
 	  moveThreshold = 120;
@@ -151,26 +148,67 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	moveToXY(randX, randY, 6.0);
 	projectile1->shootEnemy1(mBox.x, mBox.y + mBox.h/2, hildegarde);
 	projectile1->checkDie(hildegarde);
-	break;
-      case 1: moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile1->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 1:
+      if(!enemyDead) {
+	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
 	projectile2->shootEnemy2(mBox.x, mBox.y + mBox.h/2, hildegarde); 
 	projectile2->checkDie(hildegarde);
 	projectile2->checkDie1(hildegarde);
-	break;
-      case 2: moveToXY(SCREEN_WIDTH/2 - mBox.w/2, SCREEN_HEIGHT/2, 6.0);
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 2:
+      if(!enemyDead) {
+	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, SCREEN_HEIGHT/2, 6.0);
 	projectile3->shootEnemy3(mBox.x, mBox.y + mBox.h/2, hildegarde);
 	projectile3->checkDie(hildegarde);
-	break;
-      default: moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	}
+      } 
+      break;
+    default:
+      if(!enemyDead) {
+	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
 	if(fabs(mBox.x - (SCREEN_WIDTH/2 - mBox.w/2)) < 100) {
 	  projectile2->shootEnemy4(mBox.x, mBox.y + mBox.h/2, hildegarde);
 	  projectile2->checkDie(hildegarde);
 	  projectile2->checkDie(hildegarde);
 	}
-	break;
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
       }
-    case 1: switch(pattern) {
-      case 0: moveThreshold = 60;
+      break;
+    }
+  case 1: // Saucer
+    switch(pattern) {
+    case 0: // Rain and thunder
+      if(!enemyDead) {
+	moveThreshold = 60;
 	if(actionTicks % moveThreshold == 0) {
 	  changeMove = 1;
 	  randY = rand()%(SCREEN_HEIGHT - 300);
@@ -179,8 +217,20 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	moveToXY(randX, randY, 8.0);
 	projectile1->shootEnemy4(mBox.x + 50, mBox.y + 20 + mBox.h/2, hildegarde);
 	projectile2->shootEnemy3(rand()%SCREEN_WIDTH, 0, hildegarde);
-	break;
-      case 1: moveThreshold = 90;
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile1->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 1: // Sun and moon
+      if(!enemyDead) {
+	//useful pattern that I will probably use later
+	/*moveThreshold = 90;
 	if(actionTicks % moveThreshold == 0) {
 	  changeMove = 1;
 	  randY = rand()%(SCREEN_HEIGHT/5);
@@ -189,29 +239,34 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	    randX = 0;
 	  else if(randX > SCREEN_WIDTH - mBox.w)
 	    randX = SCREEN_WIDTH - mBox.w;
-	}
-	moveToXY(randX, randY, 8.0);
+	}*/
+	moveToXY(SCREEN_WIDTH - mBox.w - 10, 10, 8.0);
         projectile2->shootEnemy0(0, 0, hildegarde, 12, 90.0, 9, 10.0);
-	//projectile3->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, 40, &saucerProjectiles[NUM_PROJECTILES], 360.0, 20);
-	break;
+	projectile3->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, 40, 360.0, 20);
+	projectile4->shootEnemy0(rand()%SCREEN_WIDTH, rand()%200 + 50, hildegarde, 20, 360.0, 4, 8.0, true);
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
       }
       break;
     }
-    //printf("%i/%i\n", randX, randY);
+    break;
   }
+  //printf("%i/%i\n", randX, randY);
 }
 
 void Chara::shoot(Projectile* projectile, Enemy* enemy) {
-  //if(HGAttacking && projectile->getActiveProjectiles() < NUM_PROJECTILES)
-  //	projectile->addProjectiles();
-  //else
-  //	//projectile->resetProjectiles();
-  //projectile->shootHG(mBox.x, mBox.y, enemy, &projectilesHG[NUM_PROJECTILES]);
+  projectile->shootHG(mBox.x, mBox.y, enemy);
 }
 
 void clearAllProjectiles(bool clearPlayerProjectiles) {
   projectile2.clearProjectilesPlus();
-  projectile2.destroyProjs();
   projectile3.clearProjectilesPlus();
   projectile4.clearProjectilesPlus();
   projectile5.clearProjectilesPlus();
@@ -233,5 +288,5 @@ void resetGame(Enemy* enemy, Chara* yenisei) {
   yenisei->moved = 0; yenisei->didResetAnim = 0;
   yenisei->resetAnim = 0; HGAttacking = 0;
   actualScore = 0; score = 0;
-  difficulty = 0;
+  difficulty = 0; clearBullets = 1;
 }

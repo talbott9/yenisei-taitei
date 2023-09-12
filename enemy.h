@@ -13,7 +13,7 @@ public:
   void takeDamage();
   //int attack(BattleChara* battleLouis);
   void moveToXY(double x, double y, double speed);
-  void doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde);
+  void doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde, Projectile* projectile4 = NULL);
   void reset();
   bool moved; bool changeMove;
   int reachedTarget;
