@@ -7,12 +7,12 @@ public:
   Projectile();
   static const int MAX_SPEED = 6;
   void shootHG(double x, double y, Enemy* enemy);
-   void shootEnemy5(double x, double y, Chara* hildegarde, int number, double sectionAngle = 360.0, int batch = 10, double spd = 5.0);
-  void shootEnemy0(double x, double y, Chara* hildegarde, int number, double sectionAngle = 360.0, int batch = 10, double spd = 5.0, bool rotate = false);
-  void shootEnemy1(double x, double y, Chara* hildegarde);
-  void shootEnemy2(double x, double y, Chara* hildegarde);
-  void shootEnemy3(double x, double y, Chara* hildegarde);
-  void shootEnemy4(double x, double y, Chara* hildegarde);
+  void shootEnemy5(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle = 360.0, int batch = 10, double spd = 5.0);
+  void shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle = 360.0, double startingAngle = 0.0, int batch = 10, double spd = 5.0, bool rotate = false);
+  void shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number = 0, double sectionAngle = 0.0, int batch = 0, double spd = 0.0, bool rotate = false);
+  void shootEnemy2(double x, double y, Chara* hildegarde, enemyIDEnum enemyID);
+  void shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID);
+  void shootEnemy4(double x, double y, Chara* hildegarde, enemyIDEnum enemyID);
   void setVariables(int w, int h, double spd, int interval, LTexture* gSetTexture, int orient = 0, int spriteW = 5, int spriteH = 5);
   void setProj(SDL_Rect box, double x, double y, double spd);
   void setDirection(int directX, int directY);
@@ -22,8 +22,9 @@ public:
   int projectileTicks, projectilesShot; 
   int getSpd(); int getIntv();
   double dx, dy;
-  void moveToXY(double x, double y);
-  void moveGravity(double x, double y, double acc);
+  void moveToXY(double x, double y, bool moveY = true);
+  void moveAcc(double x, double y, double acc);
+  void moveGravity(double x, double y, double acc, bool moveX = true);
   void moveAngle(double angle);
   double projectileAngle;
   int spriteWidth, spriteHeight;
@@ -47,7 +48,7 @@ public:
   void renewProj(int num);
   bool deleteProjs;
   double angle;
-  int thing;
+  bool shotBatch, disabled;
 private:
   SDL_Rect mBox; 
   LTexture* gTexture;

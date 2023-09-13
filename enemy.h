@@ -1,7 +1,11 @@
 const int ENEMY_BATTLE_ANIM_FRAMES = 1;
 SDL_Rect gEnemyBattleClips[ENEMY_BATTLE_ANIM_FRAMES];
 
+#define NUM_COMPS 5 //companions
+
 class Projectile; class Chara;
+
+enum enemyIDEnum {conradID, saucerID};
 
 class Enemy {
 public:
@@ -30,9 +34,15 @@ public:
   void setVel(double x, double y);
   int moveThreshold;
   LTexture* gEnemyTexture;
-    int enemyID;
+  enemyIDEnum enemyID;
+  void createComps(int num);
+  void destroyComps(int num);
+  void renewComp(int num);
+  bool createdComps, clearComps;
+  void setComp(SDL_Rect box, double x, double y, enemyIDEnum id);
+  bool ready;
 public:
-  void set(LTexture* texture, int id) {
+  void set(LTexture* texture, enemyIDEnum id) {
     this->gEnemyTexture = texture;
     this->enemyID = id;
   }
@@ -41,6 +51,7 @@ private:
   int mCurrentHitPoints;
   int mMaxHitPoints;
   double dx, dy;
-  double posX, posY; 
+  double posX, posY;
+  Enemy* companions[NUM_COMPS];
 };
 

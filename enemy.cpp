@@ -16,8 +16,20 @@ Enemy::Enemy() {
 	randX = posX; randY = SCREEN_HEIGHT/6;
 	mCurrentHitPoints = 100;
 	mMaxHitPoints = 100;
-	enemy1.set(&gEnemy1Texture, 0);
-	saucer.set(&gSaucerTexture, 1);
+	enemy1.set(&gEnemy1Texture, conradID);
+	saucer.set(&gSaucerTexture, saucerID);
+}
+
+void Enemy::setComp(SDL_Rect box, double x, double y, enemyIDEnum id) {
+  posX = x;
+  posY = y;
+  mBox.x = posX;
+  mBox.y = posY;
+  mBox.w = box.w;
+  mBox.h = box.h;
+  defaultPosX = posX;
+  defaultPosY = posY;
+  enemyID = id;
 }
 
 SDL_Rect Enemy::getBox() {
@@ -77,7 +89,7 @@ void Enemy::moveToXY(double x, double y, double speed) {
 		moved = 1;
 	}
 	int dist = distance;
-	if(dist != 0) {
+	if(dist != 0 && dist != 1 && dist != -1) {
 		double distanceX = posX - x;
 		double distanceY = y - posY;
 		double speedMod = sqrt(distanceX*distanceX + distanceY*distanceY)/distance;
@@ -97,6 +109,32 @@ void Enemy::moveToXY(double x, double y, double speed) {
 		dx = 0; dy = 0;
 	}
 }
+
+void Enemy::createComps(int num) { //companions
+  if(!createdComps) {
+    for(int i = 0; i < num; i++) {
+      companions[i] = new Enemy();
+      companions[i]->enemyID = enemyID;
+    }
+    //printf("created bullets #%i, %i, %i\n", num, mBox.w, mBox.h);
+    createdComps = 1;
+  }
+}
+
+void Enemy::destroyComps(int num) {
+  for(int i = 0; i < num; i++) {
+    //projs[i]->clearProjectilesPlus();
+    delete companions[i];
+  }
+  //printf("deleted bullet #%i\n", num);
+  createdComps = 0;
+}
+
+void Enemy::renewComp(int num) {
+  delete companions[num];
+  companions[num] = new Enemy();
+}
+
 
 
 

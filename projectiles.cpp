@@ -3,7 +3,6 @@
 
 #define PI 3.14159265
 
-int enemyIDGlobal;
 bool clearBullets;
 
 Projectile projectile2;
@@ -158,7 +157,7 @@ void Projectile::shootHG(double x, double y, Enemy* enemy) {
   projectileTicks++;
 }
 
-void Projectile::moveToXY(double x, double y) {
+void Projectile::moveToXY(double x, double y, bool moveY) {
   if(!shotBullet) {
     double side1 = y - posY;
     double side2 = posX - x;
@@ -171,11 +170,38 @@ void Projectile::moveToXY(double x, double y) {
       cosAngle = -cosAngle;
       dx = speed*cosAngle;
     }
+    if(moveY) {
+      if(posY < y)
+	dy = speed*sinAngle;
+      else {
+	sinAngle = -sinAngle;
+	dy = -speed*sinAngle;
+      }
+    }
+    shotBullet = 1;
+    //printf("%g/%g/%g/%g/%g/%g/%g/%g\n", dx, dy, side1, side2, r, sinAngle, cosAngle, speed);
+  }
+}
+
+
+void Projectile::moveAcc(double x, double y, double acc) {
+  if(!shotBullet) {
+    double side1 = y - posY;
+    double side2 = posX - x;
+    double r = sqrt(side1 * side1 + side2 * side2);
+    double sinAngle = (side1/r);
+    double cosAngle = (side2/r);
+    if(posX > x)
+      dx += -speed*cosAngle*acc;
+    else {
+      cosAngle = -cosAngle;
+      dx += speed*cosAngle*acc;
+    }
     if(posY < y)
-      dy = speed*sinAngle;
+      dy += speed*sinAngle*acc;
     else {
       sinAngle = -sinAngle;
-      dy = -speed*sinAngle;
+      dy += -speed*sinAngle*acc;
     }
     shotBullet = 1;
     //printf("%g/%g/%g/%g/%g/%g/%g/%g\n", dx, dy, side1, side2, r, sinAngle, cosAngle, speed);
@@ -193,7 +219,7 @@ void Projectile::moveAngle(double angle) {
   }
 }
 
-void Projectile::moveGravity(double x, double y, double acc) {
+void Projectile::moveGravity(double x, double y, double acc, bool moveX) {
   if(!shotBullet) {
     if(x > 700)
       x -= 300;
@@ -214,11 +240,13 @@ void Projectile::moveGravity(double x, double y, double acc) {
     cosAngle = (side2/r);
     shotBullet = 1;
     //printf("%g/%g/%g/%g/%g/%g/%g/%g\n", dx, dy, side1, side2, r, sinAngle, cosAngle, speed);
-    if(posX > x)
-      dx = -speed*cosAngle;
-    else {
-      cosAngle = -cosAngle;
-      dx = speed*cosAngle;
+    if(moveX) {
+      if(posX > x)
+	dx = -speed*cosAngle;
+      else {
+	cosAngle = -cosAngle;
+	dx = speed*cosAngle;
+      }
     }
     if(posY < y)
       dy = speed*sinAngle;
@@ -230,15 +258,15 @@ void Projectile::moveGravity(double x, double y, double acc) {
   dy += acc*gravityTicks;
 }
 
-void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, int number, double sectionAngle, int batch, double spd, bool rotate) {
+void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, double startingAngle, int batch, double spd, bool rotate) {
   defaultPosX = x; defaultPosY = y;
 
   if(clearBullets)
     destroyProjs(NUM_PROJECTILES);
   createProjs(NUM_PROJECTILES);
   
-  switch(enemyIDGlobal) {
-  case 0: //Conrad
+  switch(enemyID) {
+  case conradID: //Conrad
     if(projectileTicks / intv >= number)
       projectileTicks = 0;
     //printf("%i/%i/%g/%g/%b\n", projectileTicks/intv, projectileTicks%intv, projs[projectileTicks/intv].dx, projs[projectileTicks/intv].dy, projs[projectileTicks/intv].shotBullet);
@@ -268,7 +296,7 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, int number, 
     }
     projectileTicks++;
     break;
-  case 1:  //Saucer enemy ID
+  case saucerID:  //Saucer enemy ID
     //difficulty = 2; // delete
     actualIntv = number;
     if(rotate) {
@@ -277,7 +305,7 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, int number, 
       else if(difficulty == 1)
 	actualIntv = number/2;
       else if(difficulty == 2)
-	      actualIntv = number/4;
+	actualIntv = number/4;
     }
 
     if(projectileTicks % actualIntv == 0) {
@@ -292,7 +320,7 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, int number, 
 	projs[projectilesShot]->mBox.x = projs[projectilesShot]->posX;
 	projs[projectilesShot]->mBox.y = projs[projectilesShot]->posY;
 	projs[projectilesShot]->speed = spd;
-	projs[projectilesShot]->moveAngle(projectileAngle);
+	projs[projectilesShot]->moveAngle(projectileAngle+startingAngle);
 	//printf("%f, %i, %f, %f\n", projectileAngle, projectilesShot, projs[projectilesShot]->dx, projs[projectilesShot]->dy);
 	
 	if(sectionAngle == 360.0) {
@@ -338,13 +366,15 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, int number, 
   }
 }
 
-void Projectile::shootEnemy1(double x, double y, Chara* hildegarde) {
+void Projectile::shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, int batch, double spd, bool rotate) {
   defaultPosX = x; defaultPosY = y;
 
+  if(clearBullets)
+    destroyProjs(NUM_PROJECTILES);
   createProjs(NUM_PROJECTILES);
   
-  switch(enemyIDGlobal) {
-  case 0: // Conrad ID
+  switch(enemyID) {
+  case conradID: // Conrad ID
     if(difficulty == 0)
       actualIntv = intv;
     else if(difficulty == 1)
@@ -384,14 +414,98 @@ void Projectile::shootEnemy1(double x, double y, Chara* hildegarde) {
     //	for(int i = 0; i < NUM_PROJECTILES; i++)
     //	SDL_RenderFillRect(gRenderer, &showBox[i]);
     break;
-  case 1: //Saucer enemy ID
+  case saucerID: //Saucer enemy ID
+    actualIntv = number;
+    //difficulty = 2;
     
+    if(difficulty == 0)
+      actualIntv = number*1.5;
+    else if(difficulty == 1)
+      actualIntv = number*1.25;
+    else if(difficulty == 2)
+      actualIntv = number;
+    
+
+    gravityTicks++;
+
+    if(projectileTicks / actualIntv >= NUM_PROJECTILES)
+      projectileTicks = 0;
+
+    if(projectileTicks % actualIntv == 0) {
+      for(int i = 0; i < batch; i++) {
+	//printf("enemyshot %i\n", projectilesShot);
+	projs[projectilesShot]->posX = defaultPosX;
+	projs[projectilesShot]->posY = defaultPosY;
+	projs[projectilesShot]->defaultPosX = defaultPosX;
+	projs[projectilesShot]->defaultPosY = defaultPosY;
+	projs[projectilesShot]->mBox.w = mBox.w;
+	projs[projectilesShot]->mBox.h = mBox.h;
+	projs[projectilesShot]->mBox.x = projs[projectilesShot]->posX;
+	projs[projectilesShot]->mBox.y = projs[projectilesShot]->posY;
+	if(!shotBatch) {
+	  projs[projectilesShot]->targetX = projs[projectilesShot]->posX - 200;
+	  if(i == batch-1)
+	    shotBatch = 1;
+	}
+	else {
+	  projs[projectilesShot]->targetX = projs[projectilesShot]->posX + 400;
+	  if(i == batch-1)
+	    shotBatch = 0;
+	}
+	projs[projectilesShot]->targetY = projs[projectilesShot]->posY - 50;
+	projs[projectilesShot]->speed = 5.0+(i/5.0);
+	projs[projectilesShot]->moveToXY(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
+	//printf("%f, %i, %f, %f\n", projectileAngle, projectilesShot, projs[projectilesShot]->dx, projs[projectilesShot]->dy);
+	
+	projectilesShot++;
+	if(projectilesShot >= NUM_PROJECTILES)
+	  projectilesShot = 0;
+      }
+    }
+
+    for(int i = 0; i < NUM_PROJECTILES; i++) {
+      if(checkCollision(projs[i]->mBox, camera) && projs[i]->dx != 0 && projs[i]->dy != 0) {
+	if(i % batch == 0) {
+	  if(projs[i]->mBox.y + projs[i]->mBox.h*2 < hildegarde->getY(projs[i]->posY)) {
+	    for(int j = 0; j < batch; j++) {
+	      if(i+j <= NUM_PROJECTILES) {
+		projs[i+j]->shotBullet = 0;
+		projs[i+j]->targetX = hildegarde->getX(projs[i]->posX);
+		projs[i+j]->targetY = hildegarde->getY(projs[i]->posY);
+		projs[i+j]->moveToXY(projs[i]->targetX, projs[i]->targetY);
+		projs[i+j]->moveToXY(projs[i]->targetX, projs[i]->targetY);
+		//printf("#%i %f %f\n", i+j, projs[i]->dx, projs[i]->dy);
+	      }
+	    }
+	  }
+	}
+	//printf("%b #%i\n", projs[i]->disabled, i);
+	projs[i]->posX += projs[i]->dx;
+	projs[i]->posY += projs[i]->dy + 2.0;
+	projs[i]->mBox.x = projs[i]->posX;
+	projs[i]->mBox.y = projs[i]->posY;
+	
+	if(rotate) {
+	  projs[i]->angle += 5.0;
+	  if(projs[i]->angle == 360)
+	    projs[i]->angle = 0.0;
+	}
+      } else {
+	renewProj(i);
+	//projs[i]->clearProjectilesPlus();
+      }
+      if(projs[i]->dx != 0 || projs[i]->dy != 0) {
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL, projs[i]->angle);
+        projs[i]->checkDiePlus(hildegarde);
+      }
+    }
+    projectileTicks++;
     break;
   }
 }
 
-void Projectile::shootEnemy2(double x, double y, Chara* hildegarde) {
-  projectile5.shootEnemy0(x, y, hildegarde, 5);
+void Projectile::shootEnemy2(double x, double y, Chara* hildegarde, enemyIDEnum enemyID) {
+  projectile5.shootEnemy0(x, y, hildegarde, enemyID, 5);
   if(difficulty == 0)
     actualIntv = intv;
   else if(difficulty == 1)
@@ -447,13 +561,13 @@ void Projectile::shootEnemy2(double x, double y, Chara* hildegarde) {
   //	SDL_RenderFillRect(gRenderer, &showBox[i]);
 }
 
-void Projectile::shootEnemy3(double x, double y, Chara* hildegarde) {
+void Projectile::shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID) {
   defaultPosX = x; defaultPosY = y;
 
   createProjs(NUM_PROJECTILES);
   
-  switch(enemyIDGlobal) {
-  case 0:
+  switch(enemyID) {
+  case conradID:
     if(difficulty == 0)
       actualIntv = intv;
     else if(difficulty == 1)
@@ -499,7 +613,7 @@ void Projectile::shootEnemy3(double x, double y, Chara* hildegarde) {
     //	for(int i = 0; i < NUM_PROJECTILES; i++)
     //	SDL_RenderFillRect(gRenderer, &showBox[i]);
     break;
-  case 1: //Saucer enemy ID
+  case saucerID: //Saucer enemy ID
     if(difficulty == 0)
       actualIntv = 8;
     else if(difficulty == 1)
@@ -554,22 +668,22 @@ void Projectile::shootEnemy3(double x, double y, Chara* hildegarde) {
   }
 }
 
-void Projectile::shootEnemy4(double x, double y, Chara* hildegarde) {
+void Projectile::shootEnemy4(double x, double y, Chara* hildegarde, enemyIDEnum enemyID) {
   defaultPosX = x; defaultPosY = y;
 
   createProjs(NUM_PROJECTILES);
   
-  switch(enemyIDGlobal) {
-  case 0:
+  switch(enemyID) {
+  case conradID:
 	 if(!rolledShootAttack4Rand) {
 	   shootAttack4Rand = rand()%2;
 	   rolledShootAttack4Rand = 1;
 	 }
 	 if(shootLaser) {
 	   if(difficulty == 1)
-	     projectile5.shootEnemy0(x, y, hildegarde, 5);
+	     projectile5.shootEnemy0(x, y, hildegarde, enemyID, 5);
 	   else if(difficulty == 2)
-	     projectile5.shootEnemy0(x, y, hildegarde, 10);
+	     projectile5.shootEnemy0(x, y, hildegarde, enemyID, 10);
 	   if(!shootReturn) {
 	     shootTicks += 5; 
 	     if(shootTicks >= SCREEN_WIDTH)
@@ -687,7 +801,7 @@ void Projectile::shootEnemy4(double x, double y, Chara* hildegarde) {
 	 projectileTicks++;
 	 //printf("%i/%i/%i\n", shootAttack4Rand, projs[0]->targetX, shootTicks);
 	 break;
-  case 1: projs[0]->mBox.x = x;
+  case saucerID: projs[0]->mBox.x = x;
     projs[0]->mBox.y = y;
     if(projectileTicks > 60) {
 	   if(projectileTicks >= 70) {
@@ -726,17 +840,17 @@ void Projectile::shootEnemy4(double x, double y, Chara* hildegarde) {
 }
 
 
-void Projectile::shootEnemy5(double x, double y, Chara* hildegarde, int number, double sectionAngle, int batch, double spd) {
+void Projectile::shootEnemy5(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, int batch, double spd) {
   defaultPosX = x; defaultPosY = y;
 
   if(clearBullets)
     destroyProjs(NUM_PROJECTILES);
   createProjs(NUM_PROJECTILES);
   
-  switch(enemyIDGlobal) {
-  case 0: //Conrad
+  switch(enemyID) {
+  case conradID: //Conrad
     break;
-  case 1:  //Saucer enemy ID
+  case saucerID:  //Saucer enemy ID
     //difficulty = 2; // delete
     actualIntv = number;
     if(difficulty == 0)
@@ -843,6 +957,7 @@ void Projectile::clearProjectilesPlus() {
   shootStimulant = 1; rolledShootAttack4Rand = 0;
   stimulantTicks = 0; projectileAngle = 0;
   projectilesShot = 0; projectileTicks = 0;
+  shotBatch = 0;  disabled = 0;
 }
 
 void Projectile::createProjs(int num) {

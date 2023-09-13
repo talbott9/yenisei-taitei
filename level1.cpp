@@ -122,15 +122,15 @@ void Enemy::reset() {
     difficulty++;
   mCurrentHitPoints = mMaxHitPoints;
   clearAllProjectiles();
+  createdComps = 0; ready = 0;
 }
 
 void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde, Projectile* projectile4) {
-  enemyIDGlobal = enemyID;
   gEnemyTexture->render(mBox.x, mBox.y, NULL, renderAngle);
   actionTicks++;
-  pattern = 0;
+  pattern = 2;
   switch(enemyID) { // 0 - conrad, 1 - saucer
-  case 0:
+  case conradID:
     switch(pattern) {
     case 0:
       if(!enemyDead) {
@@ -146,7 +146,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	  randY = rand()%(SCREEN_HEIGHT - 300);
 	}
 	moveToXY(randX, randY, 6.0);
-	projectile1->shootEnemy1(mBox.x, mBox.y + mBox.h/2, hildegarde);
+	projectile1->shootEnemy1(mBox.x, mBox.y + mBox.h/2, hildegarde, enemyID);
 	projectile1->checkDie(hildegarde);
       } else {
 	dx = 0; dy = 0;
@@ -160,7 +160,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
     case 1:
       if(!enemyDead) {
 	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
-	projectile2->shootEnemy2(mBox.x, mBox.y + mBox.h/2, hildegarde); 
+	projectile2->shootEnemy2(mBox.x, mBox.y + mBox.h/2, hildegarde, enemyID); 
 	projectile2->checkDie(hildegarde);
 	projectile2->checkDie1(hildegarde);
       } else {
@@ -175,7 +175,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
     case 2:
       if(!enemyDead) {
 	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, SCREEN_HEIGHT/2, 6.0);
-	projectile3->shootEnemy3(mBox.x, mBox.y + mBox.h/2, hildegarde);
+	projectile3->shootEnemy3(mBox.x, mBox.y + mBox.h/2, hildegarde, enemyID);
 	projectile3->checkDie(hildegarde);
       } else {
 	dx = 0; dy = 0;
@@ -190,7 +190,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
       if(!enemyDead) {
 	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 6.0);
 	if(fabs(mBox.x - (SCREEN_WIDTH/2 - mBox.w/2)) < 100) {
-	  projectile2->shootEnemy4(mBox.x, mBox.y + mBox.h/2, hildegarde);
+	  projectile2->shootEnemy4(mBox.x, mBox.y + mBox.h/2, hildegarde, enemyID);
 	  projectile2->checkDie(hildegarde);
 	  projectile2->checkDie(hildegarde);
 	}
@@ -204,7 +204,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
       }
       break;
     }
-  case 1: // Saucer
+  case saucerID: // Saucer
     switch(pattern) {
     case 0: // Rain and thunder
       if(!enemyDead) {
@@ -215,8 +215,8 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	  randX = hildegarde->getBox().x - mBox.w/2;
 	}
 	moveToXY(randX, randY, 8.0);
-	projectile1->shootEnemy4(mBox.x + 50, mBox.y + 20 + mBox.h/2, hildegarde);
-	projectile2->shootEnemy3(rand()%SCREEN_WIDTH, 0, hildegarde);
+	projectile1->shootEnemy4(mBox.x + 50, mBox.y + 20 + mBox.h/2, hildegarde, enemyID);
+	projectile2->shootEnemy3(rand()%SCREEN_WIDTH, 0, hildegarde, enemyID);
       } else {
 	dx = 0; dy = 0;
 	renderAngle += 30.0;
@@ -241,9 +241,9 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	    randX = SCREEN_WIDTH - mBox.w;
 	}*/
 	moveToXY(SCREEN_WIDTH - mBox.w - 10, 10, 8.0);
-        projectile2->shootEnemy0(0, 0, hildegarde, 12, 90.0, 9, 10.0);
-	projectile3->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, 40, 360.0, 20);
-	projectile4->shootEnemy0(rand()%SCREEN_WIDTH, rand()%200 + 50, hildegarde, 20, 360.0, 4, 8.0, true);
+        projectile2->shootEnemy0(0, 0, hildegarde, enemyID, 12, 90.0, 0.0, 9, 10.0);
+	projectile3->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 40, 360.0, 0.0,  20);
+	projectile4->shootEnemy0(rand()%SCREEN_WIDTH, rand()%200 + 50, hildegarde, enemyID, 20, 360.0, 0.0, 4, 8.0, true);
       } else {
 	dx = 0; dy = 0;
 	renderAngle += 30.0;
@@ -252,6 +252,50 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	  projectile2->destroyProjs(NUM_PROJECTILES);
 	  projectile3->destroyProjs(NUM_PROJECTILES);
 	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 2:
+      int numberOfComps = 2;
+      if(!enemyDead) {
+	if(clearComps)
+	  destroyComps(numberOfComps);
+	createComps(numberOfComps);
+	
+	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 10, 8.0);
+
+	int goal0 = SCREEN_WIDTH/8;
+	int goal1 = SCREEN_WIDTH - SCREEN_WIDTH/4;
+
+	if(actionTicks > 90) {
+	  projectile3->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 40, 360.0, 10);
+	  projectile4->shootEnemy0(companions[0]->mBox.x + companions[0]->mBox.w/2, companions[0]->mBox.y + companions[0]->mBox.h/2, hildegarde, companions[0]->enemyID, 10, 30.0, 75.0, 10, 10.0);
+	  projectile2->shootEnemy0(companions[1]->mBox.x + companions[1]->mBox.w/2, companions[1]->mBox.y + companions[1]->mBox.h/2, hildegarde, companions[1]->enemyID, 10, 30.0, 75.0, 10, 10.0);
+	} else {
+	  companions[0]->moveToXY(goal0, 10, 15.0);
+	  companions[1]->moveToXY(goal1, 10, 15.0);
+	}
+
+	if(clearBullets) {
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+	    
+
+	for(int i = 0; i < numberOfComps; i++) {
+	  gEnemyTexture->render(companions[i]->mBox.x, companions[i]->mBox.y, NULL);
+	  //printf("%i, %i\n", companions[i]->mBox.w, companions[i]->mBox.h);
+	}
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	  destroyComps(numberOfComps);
 	}
       }
       break;
