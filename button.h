@@ -4,7 +4,8 @@ int score = 0;
 int actualScore = 0;
 bool doAddScore;
 bool reset;
-int difficulty;
+enum difficultyLevel {easy, normal, hard};
+difficultyLevel difficulty = normal;
 
 class Button {
 	public:

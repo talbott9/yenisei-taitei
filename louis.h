@@ -43,7 +43,7 @@ public:
   void moveHG();
 
   SDL_Rect getBox();
-  double getX(double x), getY(double y);
+  double getX(double x = 0.0), getY(double y = 0.0);
   int getVelX(); int getVelY();
 
   void render(SDL_Rect& camera, LTexture* gSpriteSheetTexture);

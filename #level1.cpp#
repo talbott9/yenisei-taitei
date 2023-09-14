@@ -357,6 +357,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
     case 5: //Abduction
       numberOfComps = 2;
       if(clearBullets) {
+	
       }
       else if(!enemyDead) {
 	if(clearComps)
@@ -375,13 +376,6 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	} else {
 	  companions[0]->moveToXY(goal0, 10, 15.0);
 	  companions[1]->moveToXY(goal1, 10, 15.0);
-	}
-
-	if(clearBullets) {
-	  projectile2->destroyProjs(NUM_PROJECTILES);
-	  projectile3->destroyProjs(NUM_PROJECTILES);
-	  projectile4->destroyProjs(NUM_PROJECTILES);
-	  //clear = 0;
 	}
 	    
 

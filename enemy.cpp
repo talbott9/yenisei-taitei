@@ -66,6 +66,7 @@ void Enemy::moveToXY(double x, double y, double speed) {
 	if(changeMove) {
 		changeMove = 0;
 		moved = 0;
+		dx = 0.0; dy = 0.0;
 	}
 	if(!moved) {
 		double side1 = y - posY;
@@ -88,10 +89,9 @@ void Enemy::moveToXY(double x, double y, double speed) {
 		}
 		moved = 1;
 	}
-	int dist = distance;
-	if(dist != 0 && dist != 1 && dist != -1) {
-		double distanceX = posX - x;
-		double distanceY = y - posY;
+	double distanceX = posX - x;
+	double distanceY = y - posY;
+	if(abs(distanceX) > 5 || abs(distanceY) > 5) {
 		double speedMod = sqrt(distanceX*distanceX + distanceY*distanceY)/distance;
 		if(speedMod > 1)
 			speedMod = 0.1;

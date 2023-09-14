@@ -219,6 +219,26 @@ void Projectile::moveAngle(double angle) {
   }
 }
 
+
+double Projectile::getAngle(double x, double y) {
+  double angle;
+  double side1 = y - posY;
+  double side2 = posX - x;
+  double r = sqrt(side1 * side1 + side2 * side2);
+  double cosAngle = (side2/r);
+  angle = (std::acos(cosAngle)/PI*180.0 - 180) * -1;
+  return angle;
+}
+
+void Projectile::addAngle(double angle) {
+    double sinAngle = std::sin(angle*PI/180.0);
+    double cosAngle = std::cos(angle*PI/180.0);
+
+    dx += speed*cosAngle;
+    dy += speed*sinAngle;
+    shotBullet = 1;
+}
+
 void Projectile::moveGravity(double x, double y, double acc, bool moveX) {
   if(!shotBullet) {
     if(x > 700)
@@ -258,12 +278,13 @@ void Projectile::moveGravity(double x, double y, double acc, bool moveX) {
   dy += acc*gravityTicks;
 }
 
-void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, double startingAngle, int batch, double spd, bool rotate) {
+void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, double startingAngle, int batch, double spd, bool rotate, bool angleTarget) {
   defaultPosX = x; defaultPosY = y;
 
   if(clearBullets)
-    destroyProjs(NUM_PROJECTILES);
-  createProjs(NUM_PROJECTILES);
+   destroyProjs(NUM_PROJECTILES);
+  else
+    createProjs(NUM_PROJECTILES);
   
   switch(enemyID) {
   case conradID: //Conrad
@@ -299,13 +320,20 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
   case saucerID:  //Saucer enemy ID
     //difficulty = 2; // delete
     actualIntv = number;
-    if(rotate) {
+    if(!rotate) {
       if(difficulty == 0)
 	actualIntv = number;
       else if(difficulty == 1)
-	actualIntv = number/2;
+	actualIntv = number/1.5;
       else if(difficulty == 2)
+	actualIntv = number/2;
+    } else {
+      if(difficulty == 0)
+	actualIntv = number;
+      else if(difficulty == 1)
 	actualIntv = number/4;
+      else if(difficulty == 2)
+	actualIntv = number/8;
     }
 
     if(projectileTicks % actualIntv == 0) {
@@ -320,7 +348,18 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
 	projs[projectilesShot]->mBox.x = projs[projectilesShot]->posX;
 	projs[projectilesShot]->mBox.y = projs[projectilesShot]->posY;
 	projs[projectilesShot]->speed = spd;
-	projs[projectilesShot]->moveAngle(projectileAngle+startingAngle);
+	projs[projectilesShot]->targetX = hildegarde->getX();
+	projs[projectilesShot]->targetY = hildegarde->getY();
+	if(angleTarget) {
+	  if(i == 0)
+	    projs[projectilesShot]->moveToXY(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
+	  else if(i != 0 && i % 2 == 0)
+	    projs[projectilesShot]->moveAngle(+projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) - sectionAngle/2);
+	  else if(i != 0 && i % 2 != 0)
+	    projs[projectilesShot]->moveAngle(+projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) + sectionAngle/2);
+	} else {
+	  projs[projectilesShot]->moveAngle(projectileAngle+startingAngle);
+	}
 	//printf("%f, %i, %f, %f\n", projectileAngle, projectilesShot, projs[projectilesShot]->dx, projs[projectilesShot]->dy);
 	
 	if(sectionAngle == 360.0) {
@@ -564,6 +603,8 @@ void Projectile::shootEnemy2(double x, double y, Chara* hildegarde, enemyIDEnum 
 void Projectile::shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID) {
   defaultPosX = x; defaultPosY = y;
 
+  if(clearBullets)
+    destroyProjs(NUM_PROJECTILES);
   createProjs(NUM_PROJECTILES);
   
   switch(enemyID) {
@@ -671,6 +712,8 @@ void Projectile::shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum 
 void Projectile::shootEnemy4(double x, double y, Chara* hildegarde, enemyIDEnum enemyID) {
   defaultPosX = x; defaultPosY = y;
 
+  if(clearBullets)
+    destroyProjs(NUM_PROJECTILES);
   createProjs(NUM_PROJECTILES);
   
   switch(enemyID) {
@@ -972,15 +1015,18 @@ void Projectile::createProjs(int num) {
 }
 
 void Projectile::destroyProjs(int num) {
-  for(int i = 0; i < num; i++) {
-    //projs[i]->clearProjectilesPlus();
-    delete projs[i];
+  if(createdProjs) {
+    for(int i = 0; i < num; i++) {
+      projs[i]->clearProjectilesPlus();
+      delete projs[i];
+    }
+    createdProjs = 0;
   }
-  //printf("deleted bullet #%i\n", num);
-  createdProjs = 0;
+  //printf("deleted bullet #%i, %i, %i, %b\n", num, mBox.w, mBox.h, createdProjs);
 }
 
 void Projectile::renewProj(int num) {
   delete projs[num];
   projs[num] = new Projectile();
+  projs[num]->setProj(mBox, posX, posY, speed);
 }

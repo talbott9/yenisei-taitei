@@ -99,7 +99,41 @@ void close() {
   SDL_Quit();
 }
 
-//Augmented reset function. I couldn't find a better name for it
+
+
+Enemy enemy = enemy1;
+Projectile proj1, proj2, proj3, proj4;
+
+void clearAllProjectiles(bool clearPlayerProjectiles) {
+  proj1.destroyProjs(NUM_PROJECTILES);
+  proj2.destroyProjs(NUM_PROJECTILES);;
+  proj3.destroyProjs(NUM_PROJECTILES);
+  proj4.destroyProjs(NUM_PROJECTILES);
+  proj1.clearProjectilesPlus();
+  proj2.clearProjectilesPlus();
+  proj3.clearProjectilesPlus();
+  proj4.clearProjectilesPlus();
+  if(clearPlayerProjectiles)
+    projectileHG.clearProjectilesPlus();
+}
+
+void resetGame(Enemy* enemy, Chara* yenisei) {
+  clearAllProjectiles(true);
+  enemy->setPosXY(enemy->defaultPosX, enemy->defaultPosY);
+  enemy->deaths = 0;
+  yenisei->setPos(yenisei->defaultPosX, yenisei->defaultPosY);
+  yenisei->setVel(0, 0);
+  enemy->setVel(0,0);
+  enemy->restoreHP();
+  enemy->pattern = rand()%3;
+  enemy->changeMove = 1; enemy->actionTicks = 0;
+  yenisei->accTicks = 0; yenisei->deathTicks = 0;
+  yenisei->moved = 0; yenisei->didResetAnim = 0;
+  yenisei->resetAnim = 0; HGAttacking = 0;
+  actualScore = 0; score = 0;
+  clearBullets = 1;
+}
+
 void resetGamePlus() {
   freeAll();
   finishedCredits = 0;
@@ -110,11 +144,11 @@ void resetGamePlus() {
   isGameOverScreen = 0;
   gameOverScreenSuccess = 0;
   alphaTicks = 0;
-  resetGame(&enemy1, &yenisei);
   hildegarde.death = 0;
   attackDirection = 0;
   reset = 0;
 }
+
 
 void play(int levelID) {
   //Main loop flag
@@ -124,8 +158,7 @@ void play(int levelID) {
       SDL_Event e;
 
       hildegarde.setPos(yenisei.getBox().x - 15, yenisei.getBox().y - 25);
-      Enemy enemy = enemy1;
-      Projectile proj1, proj2, proj3, proj4;
+
       switch(levelID) {
       case 0: enemy = enemy1; proj1 = projectile2; proj2 = projectile3; proj3 = projectile4; break;
       case 1: enemy = saucer; proj1 = saucerProjectile; proj2 = projectile2; proj3 = projectile3; proj4 = starProjectile1; break;
@@ -136,6 +169,7 @@ void play(int levelID) {
 	if(inMenuScreen) {
 	  if(reset) {
 	    resetGamePlus();
+	    resetGame(&enemy, &yenisei);
 	    gTuvaMap.loadFromFile("resources/floor_tiles/tuvamap.png");
 	  }
 
@@ -174,6 +208,7 @@ void play(int levelID) {
 	    case 1: enemy = saucer; break;
 	    }
 	    resetGamePlus();
+	    resetGame(&enemy, &yenisei);
 	    gBattleSong = Mix_LoadMUS("resources/music/battlesong.ogg");
 	  }
 
@@ -221,9 +256,9 @@ void play(int levelID) {
 		quit = true;
 	    }
 	    //For testing
-	    /*if(e.key.keysym.sym == SDLK_a) {
-	      background.addXY(-100, 0);
-	      }*/
+	    if(e.key.keysym.sym == SDLK_c) {
+	      enemy.enemyDead = 1;
+	    }
 	  }
 	    yenisei.handleEvent(e);
 	    if(inMenuScreen || isCreditsScene)

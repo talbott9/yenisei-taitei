@@ -39,8 +39,11 @@ public:
   void destroyComps(int num);
   void renewComp(int num);
   bool createdComps, clearComps;
+  int numberOfComps;
   void setComp(SDL_Rect box, double x, double y, enemyIDEnum id);
   bool ready;
+  bool clear = 1;
+  int deaths;
 public:
   void set(LTexture* texture, enemyIDEnum id) {
     this->gEnemyTexture = texture;
