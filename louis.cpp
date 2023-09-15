@@ -149,10 +149,9 @@ void Chara::renderHG(SDL_Rect& camera, LTexture* gSpriteSheetTexture) {
 		animWobble = 1;
 	else
 		animWobble = 0;
-	gSpriteSheetTexture->render(mBox.x - camera.x - HGDOT_WIDTH/2 + 5, mBox.y - camera.y - HGDOT_HEIGHT/2 - 20 - animWobble + 25, currentClip);
-	/*SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
-	SDL_Rect box = mBox; 
-	SDL_RenderFillRect(gRenderer, &box);*/
+	gSpriteSheetTexture->render(mBox.x - camera.x - HGDOT_WIDTH/2 + 3, mBox.y - camera.y - HGDOT_HEIGHT/2 - 20 - animWobble + 28, currentClip);
+	SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
+	SDL_RenderFillRect(gRenderer, &mBox);
 
 }
 
@@ -178,7 +177,9 @@ void Chara::move() {
 
 void Chara::moveHG() {
   posX = yenisei.posX - 15.0;
+  posY = yenisei.posY - 28.0;
   mBox.x = posX;
+  mBox.y = posY;
 }
 
 double Chara::getX(double x) {

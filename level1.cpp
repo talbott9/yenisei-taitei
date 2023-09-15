@@ -19,6 +19,8 @@ bool loadMedia() {
 		success = false;
 	if(!gSaucerTexture.loadFromFile("resources/enemies/saucer.png"))
 		success = false;
+	if(!gHyacintheTexture.loadFromFile("resources/enemies/hyacinthe.png"))
+		success = false;
 	if(!gLevel1Floor.loadFromFile("resources/floor_tiles/level1.png"))
 		success = false;
 	if(!gLevel1Background.loadFromFile("resources/floor_tiles/level1background.png"))
@@ -126,10 +128,12 @@ void Enemy::reset() {
   clearAllProjectiles();
   createdComps = 0; ready = 0;
   clear = 1;
+  currentClip = &gEnemyClips[0];
+  flipType = SDL_FLIP_NONE;
 }
 
 void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde, Projectile* projectile4) {
-  gEnemyTexture->render(mBox.x, mBox.y, NULL, renderAngle);
+  gEnemyTexture->render(mBox.x, mBox.y, currentClip, renderAngle, NULL, flipType);
   actionTicks++;
   switch(enemyID) { // 0 - conrad, 1 - saucer
   case conradID:
@@ -404,6 +408,44 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
     }
     break;
     //printf("%i/%i\n", randX, randY);
+  case hyacintheID:
+    switch(deaths) {
+    case 0:
+      if(!enemyDead) {
+	moveThreshold = 60;
+	if(actionTicks % moveThreshold == 0) {
+	  changeMove = 1;
+	  randX = rand()%(SCREEN_WIDTH - mBox.w) + mBox.w;
+	  randY = rand()%(SCREEN_HEIGHT - 300);
+	}
+	moveToXY(randX, randY, 8.0);
+
+	if(clearBullets) {
+	}
+
+	if(dx != 0 || dy != 0) {
+	  currentClip = &gEnemyClips[1];
+	  if(dx < 0)
+	    flipType = SDL_FLIP_HORIZONTAL;
+	  else
+	    flipType = SDL_FLIP_NONE;
+	}
+	else {
+	  currentClip = &gEnemyClips[0];
+	  flipType = SDL_FLIP_NONE;
+	}
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  //projectile1->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    }
+    break;
   }
 }
 

@@ -1,17 +1,14 @@
-const int ENEMY_BATTLE_ANIM_FRAMES = 1;
-SDL_Rect gEnemyBattleClips[ENEMY_BATTLE_ANIM_FRAMES];
-
+#define ENEMY_FRAMES 10
 #define NUM_COMPS 5 //companions
 
 class Projectile; class Chara;
 
-enum enemyIDEnum {conradID, saucerID};
+enum enemyIDEnum {conradID, saucerID, hyacintheID};
 
 class Enemy {
 public:
   Enemy();
   SDL_Rect getBox();
-  SDL_Rect* currentClip;
   int getCrrPoints();
   void restoreHP();
   void takeDamage();
@@ -41,13 +38,21 @@ public:
   bool createdComps, clearComps;
   int numberOfComps;
   void setComp(SDL_Rect box, double x, double y, enemyIDEnum id);
+  SDL_Rect gEnemyClips[ENEMY_FRAMES];
+  int numberOfClips;
+  SDL_Rect* currentClip = &gEnemyClips[0];
+  void setClips(int w, int h);
   bool ready;
   bool clear = 1;
-  int deaths;
+  int deaths = 5;
+  SDL_RendererFlip flipType = SDL_FLIP_NONE;
 public:
-  void set(LTexture* texture, enemyIDEnum id) {
+  void set(LTexture* texture, enemyIDEnum id, int w, int h, int numClips) {
     this->gEnemyTexture = texture;
     this->enemyID = id;
+    this->mBox.w = w;
+    this->mBox.h = h;
+    this->numberOfClips = numClips;
   }
 private:
   SDL_Rect mBox;

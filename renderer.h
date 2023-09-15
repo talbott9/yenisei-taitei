@@ -75,5 +75,5 @@ LTexture gTuvaMap, gGameOverScreen, gGameOverScreen2, gIllust1, gIllust2;
 LTexture gYeniseiTexture;
 LTexture gHildegardeTexture;
 LTexture gHGArrow1Texture;
-LTexture gEnemy1Texture, gSaucerTexture;
+LTexture gEnemy1Texture, gSaucerTexture, gHyacintheTexture;
 LTexture gBullet1, gBullet2, gSaucerBullet, gStarBullet1;

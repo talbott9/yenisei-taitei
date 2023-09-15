@@ -1,8 +1,7 @@
 #include "enemy.h"
 
 
-Enemy enemy1;
-Enemy saucer;
+Enemy enemy1, saucer, hyacinthe;
 
 Enemy::Enemy() {
 	mBox.w = 107;
@@ -16,8 +15,21 @@ Enemy::Enemy() {
 	randX = posX; randY = SCREEN_HEIGHT/6;
 	mCurrentHitPoints = 100;
 	mMaxHitPoints = 100;
-	enemy1.set(&gEnemy1Texture, conradID);
-	saucer.set(&gSaucerTexture, saucerID);
+	enemy1.set(&gEnemy1Texture, conradID, 107, 97, 1);
+	saucer.set(&gSaucerTexture, saucerID, 107, 97, 1);
+	hyacinthe.set(&gHyacintheTexture, hyacintheID, 37, 64, 2);
+	enemy1.setClips(enemy1.mBox.w, enemy1.mBox.h);
+	saucer.setClips(saucer.mBox.w, saucer.mBox.h);
+	hyacinthe.setClips(hyacinthe.mBox.w, hyacinthe.mBox.h);
+}
+
+void Enemy::setClips(int w, int h) {
+  for(int i = 0; i < numberOfClips; i++) {
+    gEnemyClips[i].x = w*i;
+    gEnemyClips[i].y = 0;
+    gEnemyClips[i].w = w;
+    gEnemyClips[i].h = h;
+  }
 }
 
 void Enemy::setComp(SDL_Rect box, double x, double y, enemyIDEnum id) {
