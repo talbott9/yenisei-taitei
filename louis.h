@@ -52,11 +52,13 @@ public:
   int count = 0;
   void setState(int x);
   void setPos(int x, int y);
+  void modPos(double x, double );
   void setVel(double dx, double dy);
   bool resetAnim; bool didResetAnim;
   bool moveUp, moveDown, moveLeft, moveRight;
   bool gracePeriod;
   int graceTicks;
+  double speedModX;
   
   int animWobble;
   void shoot(Projectile* projectile, Enemy* enemy);

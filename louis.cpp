@@ -157,6 +157,15 @@ void Chara::renderHG(SDL_Rect& camera, LTexture* gSpriteSheetTexture) {
 
 void Chara::move() {
   if(!hildegarde.death) {
+    posX += speedModX;
+    if(speedModX > 0) {
+      if(posX > SCREEN_WIDTH)
+	posX -= speedModX;
+    } else if (speedModX < 0) {
+      if(posX - 20 < 0)
+	posX -= speedModX;
+    }
+    mBox.x = posX;
     mVelX = DOT_VEL;
     if(moveRight) {
       posX += mVelX;
@@ -173,6 +182,7 @@ void Chara::move() {
       mBox.x = posX;
     }
   }
+  speedModX = 0.0;
 }
 
 void Chara::moveHG() {
@@ -183,10 +193,15 @@ void Chara::moveHG() {
 }
 
 double Chara::getX(double x) {
-	return posX + mBox.w/2;
+  return posX + mBox.w/2;
 }
 double Chara::getY(double y) {
-	return posY + mBox.h/2;
+  return posY + mBox.h/2;
+}
+
+void Chara::modPos(double x, double y) {
+  posX += x;
+  posY += y;
 }
 
 void Chara::moveToXY(double x, double y, double speed) {

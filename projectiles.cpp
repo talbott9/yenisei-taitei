@@ -5,13 +5,7 @@
 
 bool clearBullets;
 
-Projectile projectile2;
-Projectile projectile3;
-Projectile projectile4;
-Projectile projectile5;
-Projectile saucerProjectile;
-Projectile starProjectile1;
-Projectile projectileHG;
+Projectile projectile2, projectile3, projectile4, projectile5, saucerProjectile, starProjectile1, snowflakeProjectile, shardProjectile, projectileHG;
 
 SDL_Rect laserBoxes[NUM_PROJECTILES];
 
@@ -25,6 +19,8 @@ Projectile::Projectile() {
   projectile5.setVariables(15, 15, 9.0, 2, &gBullet1, 0, 25, 25);
   saucerProjectile.setVariables(10, 23, 9.0, 2, &gSaucerBullet, 0, 23, 23);
   starProjectile1.setVariables(7, 7, 6.0, 10, &gStarBullet1, 0, 25, 25);
+  snowflakeProjectile.setVariables(8, 8, 6.0, 10, &gSnowflakeBullet, 0, 15, 15);
+  shardProjectile.setVariables(7, 7, 6.0, 10, &gShardBullet, 0, 25, 25);
 }
 
 void Projectile::setProj(SDL_Rect box, double x, double y, double spd) {
@@ -151,7 +147,7 @@ void Projectile::shootHG(double x, double y, Enemy* enemy) {
 	renderY += -spriteHeight/2 + 10;
 	break;
       } 
-      gTexture->render(renderX, renderY, NULL, angle);
+      gTexture->render(renderX - camera.x, renderY - camera.y, NULL, angle);
     }
   }
   projectileTicks++;
@@ -311,7 +307,7 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
 	projs[i]->clearProjectilesPlus();
       }
       if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
-	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL);
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL);
 	//	showBox[i] = projs[i]->getBox();
       } 
     }
@@ -393,7 +389,83 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
 	//projs[i]->clearProjectilesPlus();
       }
       if(projs[i]->dx != 0 || projs[i]->dy != 0) {
-	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL, projs[i]->angle);
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL, projs[i]->angle);
+        projs[i]->checkDiePlus(hildegarde);
+      }
+      /*SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
+      SDL_Rect box = projs[i]->mBox;
+      SDL_RenderFillRect(gRenderer, &box);*/
+    }
+    projectileTicks++;
+    break;
+  case hyacintheID:  //Saucer enemy ID
+    //difficulty = 2; // delete
+    actualIntv = number;
+    if(difficulty == 0)
+      actualIntv = number;
+    else if(difficulty == 1)
+      actualIntv = number/1.5;
+    else if(difficulty == 2)
+      actualIntv = number/2;
+
+    if(projectileTicks % actualIntv == 0) {
+      for(int i = 0; i < batch; i++) {
+	//printf("enemyshot %i\n", projectilesShot);
+	projs[projectilesShot]->posX = defaultPosX;
+	projs[projectilesShot]->posY = defaultPosY;
+	projs[projectilesShot]->defaultPosX = defaultPosX;
+	projs[projectilesShot]->defaultPosY = defaultPosY;
+	projs[projectilesShot]->mBox.w = mBox.w;
+	projs[projectilesShot]->mBox.h = mBox.h;
+	projs[projectilesShot]->mBox.x = projs[projectilesShot]->posX;
+	projs[projectilesShot]->mBox.y = projs[projectilesShot]->posY;
+	projs[projectilesShot]->speed = spd;
+	projs[projectilesShot]->targetX = hildegarde->getX();
+	projs[projectilesShot]->targetY = hildegarde->getY();
+	if(angleTarget) {
+	  if(i == 0)
+	    projs[projectilesShot]->moveToXY(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
+	  else if(i != 0 && i % 2 == 0)
+	    projs[projectilesShot]->moveAngle(+projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) - sectionAngle/2);
+	  else if(i != 0 && i % 2 != 0)
+	    projs[projectilesShot]->moveAngle(+projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) + sectionAngle/2);
+	} else {
+	  projs[projectilesShot]->moveAngle(projectileAngle+startingAngle);
+	}
+	//printf("%f, %i, %f, %f\n", projectileAngle, projectilesShot, projs[projectilesShot]->dx, projs[projectilesShot]->dy);
+	
+	if(sectionAngle == 360.0) {
+	  projectileAngle += sectionAngle/batch;
+	  if(projectileAngle > sectionAngle)
+	    projectileAngle = sectionAngle/batch;
+	} else {
+	  projectileAngle += sectionAngle/(batch-1);
+	  if(projectileAngle > sectionAngle)
+	    projectileAngle = 0;
+	}
+	
+	projectilesShot++;
+	if(projectilesShot >= NUM_PROJECTILES)
+	  projectilesShot = 0;
+      }
+    }
+    for(int i = 0; i < NUM_PROJECTILES; i++) {
+      if(checkCollision(projs[i]->mBox, camera)) {
+	projs[i]->posX += projs[i]->dx;
+	projs[i]->posY += projs[i]->dy;
+	projs[i]->mBox.x = projs[i]->posX;
+	projs[i]->mBox.y = projs[i]->posY;
+	if(rotate) {
+	  projs[i]->angle += 5.0;
+	  if(projs[i]->angle == 360)
+	    projs[i]->angle = 0.0;
+	}
+      } else {
+	renewProj(i);
+	//projs[i]->clearProjectilesPlus();
+      }
+      if(projs[i]->dx != 0 || projs[i]->dy != 0) {
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL, projs[i]->angle);
         projs[i]->checkDiePlus(hildegarde);
       }
       /*SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
@@ -443,7 +515,7 @@ void Projectile::shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum 
         renewProj(i);
       }
       if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
-	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL);
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL);
 	//	showBox[i] = projs[i]->getBox();
       } 
       //printf("%i/%i/%b/%i/%i/%i/%i\n", projs[i]->dx, projs[i]->dy, checkCollision(projs[i]->mBox, camera), hildegarde->getBox()->x, hildegarde->getBox()->y, projs[i]->targetX, projs[i]->targetY);
@@ -534,7 +606,75 @@ void Projectile::shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum 
 	//projs[i]->clearProjectilesPlus();
       }
       if(projs[i]->dx != 0 || projs[i]->dy != 0) {
-	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL, projs[i]->angle);
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL, projs[i]->angle);
+        projs[i]->checkDiePlus(hildegarde);
+      }
+    }
+    projectileTicks++;
+    break;
+  case hyacintheID:
+    actualIntv = number;
+    //difficulty = 2;
+    
+    if(difficulty == 0)
+      actualIntv = number*1.5;
+    else if(difficulty == 1)
+      actualIntv = number*1.25;
+    else if(difficulty == 2)
+      actualIntv = number;
+    
+
+    gravityTicks++;
+
+    if(projectileTicks / actualIntv >= NUM_PROJECTILES)
+      projectileTicks = 0;
+
+    if(projectileTicks % actualIntv == 0) {
+      for(int i = 0; i < batch; i++) {
+	//printf("enemyshot %i\n", projectilesShot);
+	projs[projectilesShot]->posX = defaultPosX;
+	projs[projectilesShot]->posY = defaultPosY;
+	projs[projectilesShot]->defaultPosX = defaultPosX;
+	projs[projectilesShot]->defaultPosY = defaultPosY;
+	projs[projectilesShot]->mBox.w = mBox.w;
+	projs[projectilesShot]->mBox.h = mBox.h;
+	projs[projectilesShot]->mBox.x = projs[projectilesShot]->posX;
+	projs[projectilesShot]->mBox.y = projs[projectilesShot]->posY;
+	projs[projectilesShot]->targetX = hildegarde->getX();
+	projs[projectilesShot]->targetY = hildegarde->getY();
+	double thing1 = i;
+	double thing2 = batch;
+	double thing = (thing1/thing2);
+	projs[projectilesShot]->speed = spd-(thing*10);
+	//printf("%f\n", thing);
+	projs[projectilesShot]->angle = projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
+	projs[projectilesShot]->moveToXY(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
+	//printf("%f, %i, %f, %f\n", projectileAngle, projectilesShot, projs[projectilesShot]->dx, projs[projectilesShot]->dy);
+	
+	projectilesShot++;
+	if(projectilesShot >= NUM_PROJECTILES)
+	  projectilesShot = 0;
+      }
+    }
+
+    for(int i = 0; i < NUM_PROJECTILES; i++) {
+      if(checkCollision(projs[i]->mBox, camera) && projs[i]->dx != 0 && projs[i]->dy != 0) {
+	projs[i]->posX += projs[i]->dx;
+	projs[i]->posY += projs[i]->dy;
+	projs[i]->mBox.x = projs[i]->posX;
+	projs[i]->mBox.y = projs[i]->posY;
+	
+	if(rotate) {
+	  projs[i]->angle += 5.0;
+	  if(projs[i]->angle == 360)
+	    projs[i]->angle = 0.0;
+	}
+      } else {
+	renewProj(i);
+	//projs[i]->clearProjectilesPlus();
+      }
+      if(projs[i]->dx != 0 || projs[i]->dy != 0) {
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL, projs[i]->angle);
         projs[i]->checkDiePlus(hildegarde);
       }
     }
@@ -589,7 +729,7 @@ void Projectile::shootEnemy2(double x, double y, Chara* hildegarde, enemyIDEnum 
       projs[i]->shotBullet = 0;
     }
     if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
-      gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL, angle);
+      gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL, angle);
       //		showBox[i] = projs[i]->getBox();
     } 
     //printf("%i/%i/%b/%i/%i/%i/%i\n", projs[i]->dx, projs[i]->dy, checkCollision(projs[i]->mBox, camera), hildegarde->getBox()->x, hildegarde->getBox()->y, projs[i]->targetX, projs[i]->targetY);
@@ -600,7 +740,7 @@ void Projectile::shootEnemy2(double x, double y, Chara* hildegarde, enemyIDEnum 
   //	SDL_RenderFillRect(gRenderer, &showBox[i]);
 }
 
-void Projectile::shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID) {
+void Projectile::shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, double velX) {
   defaultPosX = x; defaultPosY = y;
 
   if(clearBullets)
@@ -644,7 +784,7 @@ void Projectile::shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum 
 	renewProj(i);
       }
       if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
-	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL, angle);
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL, angle);
 	//		showBox[i] = projs[i]->getBox();
       } 
       //printf("%i/%i/%b/%i/%i/%i/%i\n", projs[i]->targetX, projs[i]->targetY);
@@ -695,7 +835,7 @@ void Projectile::shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum 
 	projs[i]->shotBullet = 0; projs[i]->moveGravityBullet = 0;
       }
       if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
-	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL, angle);
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL, angle);
 	//		showBox[i] = projs[i]->getBox();
 	projs[i]->checkDiePlus(hildegarde);
       } 
@@ -705,6 +845,51 @@ void Projectile::shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum 
     //SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
     //	for(int i = 0; i < NUM_PROJECTILES; i++)
     //	SDL_RenderFillRect(gRenderer, &showBox[i]);
+    break;
+  case hyacintheID:
+    if(difficulty == 0)
+      actualIntv = 8;
+    else if(difficulty == 1)
+      actualIntv = 4;
+    else if(difficulty == 2)
+      actualIntv = 2;
+    if(projectileTicks / actualIntv >= NUM_PROJECTILES)
+      projectileTicks = 0;
+
+    gravityTicks++;
+
+    if(projectileTicks % actualIntv == 0 && (projs[projectileTicks/actualIntv]->dx == 0.0 && projs[projectileTicks/actualIntv]->dy == 0.0)) {
+      projs[projectileTicks/actualIntv]->posX = defaultPosX; projs[projectileTicks/actualIntv]->posY = defaultPosY;
+      projs[projectileTicks/actualIntv]->defaultPosX = defaultPosX; projs[projectileTicks/actualIntv]->defaultPosY = defaultPosY;
+      projs[projectileTicks/actualIntv]->mBox.x = posX; projs[projectileTicks/actualIntv]->mBox.y = posY;
+      projs[projectileTicks/actualIntv]->targetX = rand()%SCREEN_WIDTH; projs[projectileTicks/actualIntv]->targetY = SCREEN_HEIGHT;
+      projs[projectileTicks/actualIntv]->speed = speed;
+      projs[projectileTicks/actualIntv]->mBox.w = mBox.w;
+      projs[projectileTicks/actualIntv]->mBox.h = mBox.h;
+      projs[projectileTicks/actualIntv]->moveGravityBullet = 1;
+    }
+    for(int i = 0; i < NUM_PROJECTILES; i++) {
+      if(checkCollision(projs[i]->mBox, camera)) {
+	if(projs[i]->moveGravityBullet)
+	  projs[i]->moveGravity(projs[i]->targetX, projs[i]->targetY, 0.1);
+	projs[i]->posX += velX;
+	projs[i]->posY += projs[i]->dy - 1;
+	projs[i]->mBox.x = projs[i]->posX;
+	projs[i]->mBox.y = projs[i]->posY;
+      } else {
+	projs[i]->posX = defaultPosX;
+	projs[i]->posY = defaultPosY;
+	projs[i]->mBox.x = projs[i]->posX;
+	projs[i]->mBox.y = projs[i]->posY;
+	projs[i]->dx = 0.0; projs[i]->dy = 0.0;
+	projs[i]->shotBullet = 0; projs[i]->moveGravityBullet = 0;
+      }
+      if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL, angle);
+	projs[i]->checkDiePlus(hildegarde);
+      } 
+    }
+    projectileTicks++;
     break;
   }
 }
@@ -837,14 +1022,15 @@ void Projectile::shootEnemy4(double x, double y, Chara* hildegarde, enemyIDEnum 
 	 }
 	 for(int i = 0; i < 3; i++) {
 	   if((projs[i]->dx != 0.0 || projs[i]->dy != 0.0) && shootStimulant) {
-	     gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL);
+	     gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL);
 	   } 
 	 }
 	 //printf("%i/%i/%b/%i/%i/%i/%i\n", projs[i]->dx, projs[i]->dy, checkCollision(projs[i]->mBox, camera), hildegarde->getBox()->x, hildegarde->getBox()->y, projs[i]->targetX, projs[i]->targetY);
 	 projectileTicks++;
 	 //printf("%i/%i/%i\n", shootAttack4Rand, projs[0]->targetX, shootTicks);
 	 break;
-  case saucerID: projs[0]->mBox.x = x;
+  case saucerID:
+    projs[0]->mBox.x = x;
     projs[0]->mBox.y = y;
     if(projectileTicks > 60) {
 	   if(projectileTicks >= 70) {
@@ -868,7 +1054,7 @@ void Projectile::shootEnemy4(double x, double y, Chara* hildegarde, enemyIDEnum 
 	   }
 	   //SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
 	   for(int i = 1; i < 120; i++) {
-	     gTexture->render(projs[i]->mBox.x - mBox.w/2, projs[i]->mBox.y, NULL, angle);
+	     gTexture->render(projs[i]->mBox.x - mBox.w/2 - camera.x, projs[i]->mBox.y - camera.y, NULL, angle);
 	     //SDL_RenderFillRect(gRenderer, &projs[i]->mBox);
 	     if(checkCollision(projs[i]->mBox, hildegarde->getBox()))
 	       hildegarde->death = 1;
@@ -883,7 +1069,7 @@ void Projectile::shootEnemy4(double x, double y, Chara* hildegarde, enemyIDEnum 
 }
 
 
-void Projectile::shootEnemy5(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, int batch, double spd) {
+void Projectile::shootEnemy5(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, double startingAngle, int batch, double spd, bool rotate) {
   defaultPosX = x; defaultPosY = y;
 
   if(clearBullets)
@@ -893,63 +1079,88 @@ void Projectile::shootEnemy5(double x, double y, Chara* hildegarde, enemyIDEnum 
   switch(enemyID) {
   case conradID: //Conrad
     break;
-  case saucerID:  //Saucer enemy ID
-    //difficulty = 2; // delete
+  case saucerID:
+    break;
+  case hyacintheID:
     actualIntv = number;
-    if(difficulty == 0)
-      actualIntv = number;
-    else if(difficulty == 1)
-      actualIntv = number/1.25;
-    else if(difficulty == 2)
-    actualIntv = number/1.5;
+
+    if(screenShake) {
+      disableScreenShakeTicks++;
+      if(disableScreenShakeTicks >= 30) {
+	screenShake = 0;
+	disableScreenShakeTicks = 0;
+      }
+    }
 
     if(projectileTicks % actualIntv == 0) {
+      projectileTicks = 1;
+      int squareRoot = sqrt(batch);
       for(int i = 0; i < batch; i++) {
-	//printf("enemyshot %i\n", projectilesShot);
-	projs[projectilesShot]->posX = defaultPosX;
-	projs[projectilesShot]->posY = defaultPosY;
-	projs[projectilesShot]->defaultPosX = defaultPosX;
-	projs[projectilesShot]->defaultPosY = defaultPosY;
-	projs[projectilesShot]->mBox.w = mBox.w;
-	projs[projectilesShot]->mBox.h = mBox.h;
-	projs[projectilesShot]->mBox.x = projs[projectilesShot]->posX;
-	projs[projectilesShot]->mBox.y = projs[projectilesShot]->posY;
-	projs[projectilesShot]->speed = spd;
-	projs[projectilesShot]->moveAngle(projectileAngle);
-	//printf("%f, %i, %f, %f\n", projectileAngle, projectilesShot, projs[projectilesShot]->dx, projs[projectilesShot]->dy);
-	
-	if(sectionAngle == 360.0) {
-	  projectileAngle += sectionAngle/batch;
-	  if(projectileAngle > sectionAngle)
-	    projectileAngle = sectionAngle/batch;
-	} else {
-	  projectileAngle += sectionAngle/(batch-1);
-	  if(projectileAngle > sectionAngle)
-	    projectileAngle = 0;
+	if(i % squareRoot == 0) {
+	  projs[projectilesShot]->mBox.w = mBox.w;
+	  projs[projectilesShot]->mBox.h = mBox.h;
+	  projs[projectilesShot]->posX = x;
+	  projs[projectilesShot]->posY = y + spriteHeight*(i/squareRoot);
+	  projs[projectilesShot]->defaultPosX = defaultPosX;
+	  projs[projectilesShot]->defaultPosY = defaultPosY;
+	  projs[projectilesShot]->mBox.x = projs[projectilesShot]->posX;
+	  projs[projectilesShot]->mBox.y = projs[projectilesShot]->posY;
+	  projs[projectilesShot]->targetX = hildegarde->getX() - spriteWidth*squareRoot/2;
+	  projs[projectilesShot]->targetY = hildegarde->getY() - spriteHeight*squareRoot/2;
+	  projs[projectilesShot]->speed = spd;
+	  projs[projectilesShot]->moveToXY(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
+	  projs[projectilesShot]->shotBullet = 0;
+	  for(int j = 0; j < squareRoot; j++) {
+	    if(projectilesShot+j <= batch) {
+	      projs[projectilesShot+j]->defaultPosX = projs[projectilesShot]->defaultPosX;
+	      projs[projectilesShot+j]->defaultPosY = projs[projectilesShot]->defaultPosY;
+	      projs[projectilesShot+j]->posX = projs[projectilesShot]->posX + spriteWidth*j;
+	      projs[projectilesShot+j]->posY = projs[projectilesShot]->posY;
+	      projs[projectilesShot+j]->mBox.x = projs[projectilesShot+j]->posX;
+	      projs[projectilesShot+j]->mBox.y = projs[projectilesShot+j]->posY;
+	      projs[projectilesShot+j]->dx = projs[0]->dx;
+	      projs[projectilesShot+j]->dy = projs[0]->dy;
+	    }
+	  }
 	}
 	
 	projectilesShot++;
-	if(projectilesShot >= NUM_PROJECTILES)
+	if(projectilesShot >= batch)
 	  projectilesShot = 0;
       }
     }
-    for(int i = 0; i < NUM_PROJECTILES; i++) {
-      if(checkCollision(projs[i]->mBox, camera)) {
+    
+    for(int i = 0; i < batch; i++) {
+      if(checkCollision(projs[i]->mBox, camera) && projs[i]->dx != 0 && projs[i]->dy != 0) {
 	projs[i]->posX += projs[i]->dx;
 	projs[i]->posY += projs[i]->dy;
 	projs[i]->mBox.x = projs[i]->posX;
 	projs[i]->mBox.y = projs[i]->posY;
+
+	if((projs[i]->mBox.x + spriteWidth > SCREEN_WIDTH || projs[i]->mBox.x - spriteWidth/2 < camera.x || projs[i]->mBox.y + spriteHeight > SCREEN_HEIGHT || projs[i]->mBox.y - spriteHeight/2 < camera.y) && !projs[i]->explode) {
+	  for(int j = 0; j < batch; j++) {
+	    projs[j]->explode = 1;
+	  }
+	  screenShake = 1;
+	}
+	
+	if(projs[i]->explode) {
+	  projs[i]->moveGravity(rand()%SCREEN_WIDTH, rand()%(SCREEN_HEIGHT - 500), 0.05, true);
+	}
+	
+	if(rotate) {
+	  projs[i]->angle += 5.0;
+	  if(projs[i]->angle == 360)
+	    projs[i]->angle = 0.0;
+	}
       } else {
-	//renewProj(i);
-	projs[i]->clearProjectilesPlus();
+	renewProj(i);
+	//projs[i]->clearProjectilesPlus();
       }
       if(projs[i]->dx != 0 || projs[i]->dy != 0) {
-	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3, projs[i]->mBox.y - projs[i]->mBox.h/3, NULL, projs[i]->angle);
-        projs[i]->checkDiePlus(hildegarde);
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/3 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/3 - camera.y, NULL, projs[i]->angle);
+	projs[i]->checkDiePlus(hildegarde);
       }
-      /*SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
-      SDL_Rect box = projs[i]->mBox;
-      SDL_RenderFillRect(gRenderer, &box);*/
     }
     projectileTicks++;
     break;
@@ -1001,6 +1212,7 @@ void Projectile::clearProjectilesPlus() {
   stimulantTicks = 0; projectileAngle = 0;
   projectilesShot = 0; projectileTicks = 0;
   shotBatch = 0;  disabled = 0;
+  explode = 0; disableScreenShakeTicks = 0;
 }
 
 void Projectile::createProjs(int num) {

@@ -3,6 +3,8 @@
 
 Enemy enemy1, saucer, hyacinthe;
 
+bool screenShake;
+
 Enemy::Enemy() {
 	mBox.w = 107;
 	mBox.h = 97;

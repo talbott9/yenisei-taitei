@@ -14,7 +14,7 @@ public:
   void takeDamage();
   //int attack(BattleChara* battleLouis);
   void moveToXY(double x, double y, double speed);
-  void doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde, Projectile* projectile4 = NULL);
+  void doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Projectile* projectile4, Chara* hildegarde, Chara* yenisei);
   void reset();
   bool moved; bool changeMove;
   int reachedTarget;
@@ -44,7 +44,7 @@ public:
   void setClips(int w, int h);
   bool ready;
   bool clear = 1;
-  int deaths = 5;
+  int deaths = 3;
   SDL_RendererFlip flipType = SDL_FLIP_NONE;
 public:
   void set(LTexture* texture, enemyIDEnum id, int w, int h, int numClips) {

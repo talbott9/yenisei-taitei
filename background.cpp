@@ -28,8 +28,8 @@ void Background::render(SDL_Rect& camera) {
 //	}
 	gBackground.render(background.x, background.y);
 	gBackgroundSup.render(background.x + background.w, background.y);
-	gFloor.render(floor.x, floor.y);
-	gFloorSup.render(floor.x + floor.w, floor.y);
+	gFloor.render(floor.x - camera.x, floor.y - camera.y);
+	gFloorSup.render(floor.x + floor.w - camera.x, floor.y - camera.y);
 	if(backgroundTicks % 1 == 0)
 		floor.x -= 5;
 	if(backgroundTicks % 25 == 0) {

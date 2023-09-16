@@ -33,6 +33,10 @@ bool loadMedia() {
 		success = false;
 	if(!gStarBullet1.loadFromFile("resources/projectiles/starbullet1.png"))
 		success = false;
+	if(!gSnowflakeBullet.loadFromFile("resources/projectiles/snowflakebullet.png"))
+		success = false;
+	if(!gShardBullet.loadFromFile("resources/projectiles/shardbullet.png"))
+		success = false;
 	if(!gYeniseiTexture.loadFromFile("resources/yenisei/yeniseisprites.png"))	{
 		printf( "Failed to load texture!\n" );
 		success = false;
@@ -124,16 +128,18 @@ void Enemy::reset() {
     difficulty++;
   else if(actualScore == 6000)
   difficulty++;*/
+  mMaxHitPoints = 100;
   mCurrentHitPoints = mMaxHitPoints;
   clearAllProjectiles();
   createdComps = 0; ready = 0;
   clear = 1;
   currentClip = &gEnemyClips[0];
   flipType = SDL_FLIP_NONE;
+  screenShake = 0;
 }
 
-void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Chara* hildegarde, Projectile* projectile4) {
-  gEnemyTexture->render(mBox.x, mBox.y, currentClip, renderAngle, NULL, flipType);
+void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Projectile* projectile4, Chara* hildegarde, Chara* yenisei) {
+  gEnemyTexture->render(mBox.x - camera.x, mBox.y - camera.y, currentClip, renderAngle, NULL, flipType);
   actionTicks++;
   switch(enemyID) { // 0 - conrad, 1 - saucer
   case conradID:
@@ -409,30 +415,111 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
     break;
     //printf("%i/%i\n", randX, randY);
   case hyacintheID:
+    
+    if(dx != 0 || dy != 0) {
+      currentClip = &gEnemyClips[1];
+      if(dx < 0)
+	flipType = SDL_FLIP_HORIZONTAL;
+      else
+	flipType = SDL_FLIP_NONE;
+    }
+    else {
+      currentClip = &gEnemyClips[0];
+      flipType = SDL_FLIP_NONE;
+    }
+    
     switch(deaths) {
     case 0:
       if(!enemyDead) {
+	mMaxHitPoints = 50;
 	moveThreshold = 60;
 	if(actionTicks % moveThreshold == 0) {
 	  changeMove = 1;
-	  randX = rand()%(SCREEN_WIDTH - mBox.w) + mBox.w;
-	  randY = rand()%(SCREEN_HEIGHT - 300);
+	  randY = rand()%(SCREEN_HEIGHT - 500);
+	  if(hildegarde->getBox().x > SCREEN_WIDTH/2)
+	    randX = rand()%(SCREEN_WIDTH/4);
+	  else
+	    randX = rand()%(SCREEN_WIDTH/4) + 3*SCREEN_WIDTH/4 - mBox.w;
 	}
 	moveToXY(randX, randY, 8.0);
 
+	if(actionTicks > 60) {
+	  projectile3->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 40, 360.0, 10, 20.0, false);
+	  projectile4->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 40, 360.0, 0, 10, 5.0, true);
+	}
+	
 	if(clearBullets) {
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	  projectile4->destroyProjs(NUM_PROJECTILES);
 	}
 
-	if(dx != 0 || dy != 0) {
-	  currentClip = &gEnemyClips[1];
-	  if(dx < 0)
-	    flipType = SDL_FLIP_HORIZONTAL;
-	  else
-	    flipType = SDL_FLIP_NONE;
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	  projectile4->destroyProjs(NUM_PROJECTILES);
 	}
-	else {
-	  currentClip = &gEnemyClips[0];
-	  flipType = SDL_FLIP_NONE;
+      }
+      break;
+    case 1: //Blizzard
+      double dxOfProjectile;
+      mMaxHitPoints = 50;
+      if(!enemyDead) {
+	moveThreshold = 180;
+	if(actionTicks % moveThreshold == 0) {
+	  changeMove = 1;
+	  randY = rand()%(100);
+	  if(mBox.x > SCREEN_WIDTH/2)
+	    randX = 0;
+	  else
+	    randX = SCREEN_WIDTH-mBox.w;
+	}
+
+	moveToXY(randX, randY, 6.0);
+
+	if(actionTicks > 60) {
+	  dxOfProjectile = (SCREEN_WIDTH/2 - posX)/(SCREEN_WIDTH/16);
+	  projectile2->shootEnemy3(rand()%SCREEN_WIDTH, 0, hildegarde, enemyID, dxOfProjectile);
+
+	  yenisei->speedModX = dxOfProjectile/2;
+	}
+	
+	if(clearBullets) {
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 2:
+      if(!enemyDead) {
+	mMaxHitPoints = 100;
+	moveThreshold = 60;
+	if(actionTicks % moveThreshold == 0) {
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 400);
+	  randX = hildegarde->getBox().x - mBox.w/2;
+	}
+	moveToXY(randX, randY, 8.0);
+
+	if(actionTicks > 60) {
+	  projectile4->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 40, 0.0, 10, 10.0, true);
+	}
+	
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
 	}
 	
       } else {
@@ -440,7 +527,42 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	renderAngle += 30.0;
 	if(renderAngle >= 720) {
 	  reset();
-	  //projectile1->destroyProjs(NUM_PROJECTILES);
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 3: //Ice cube
+      if(!enemyDead) {
+	mMaxHitPoints = 50;
+	/*moveThreshold = ;
+	if(actionTicks % moveThreshold == 0) {
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 400);
+	  randX = hildegarde->getBox().x - mBox.w/2;
+	  }*/
+	
+	moveToXY(SCREEN_WIDTH/2, 50, 8.0);
+
+
+	
+	if(actionTicks > 60) 
+	  projectile4->shootEnemy5(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 360, 360.0, 0.0, 196, 5.0, true);
+
+	if(actionTicks > 90)
+	  projectile3->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 40, 360.0, 20, 20.0, false);
+	
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	}
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile3->destroyProjs(NUM_PROJECTILES);
 	}
       }
       break;

@@ -125,13 +125,13 @@ void resetGame(Enemy* enemy, Chara* yenisei) {
   yenisei->setVel(0, 0);
   enemy->setVel(0,0);
   enemy->restoreHP();
-  enemy->pattern = rand()%3;
   enemy->changeMove = 1; enemy->actionTicks = 0;
   yenisei->accTicks = 0; yenisei->deathTicks = 0;
   yenisei->moved = 0; yenisei->didResetAnim = 0;
   yenisei->resetAnim = 0; HGAttacking = 0;
   actualScore = 0; score = 0;
   clearBullets = 1;
+  screenShake = 0;
 }
 
 void resetGamePlus() {
@@ -162,7 +162,7 @@ void play(int levelID) {
       switch(levelID) {
       case 0: enemy = enemy1; proj1 = projectile2; proj2 = projectile3; proj3 = projectile4; break;
       case 1: enemy = saucer; proj1 = saucerProjectile; proj2 = projectile2; proj3 = projectile3; proj4 = starProjectile1; break;
-      case 2: enemy = hyacinthe; proj1 = saucerProjectile; proj2 = projectile2; proj3 = projectile3; proj4 = starProjectile1; break;
+      case 2: enemy = hyacinthe; proj1 = saucerProjectile; proj2 = projectile2; proj3 = shardProjectile; proj4 = snowflakeProjectile; break;
       }
 
       //While application is running
@@ -232,7 +232,7 @@ void play(int levelID) {
 	  yenisei.render(camera, &gYeniseiTexture);
 	  hildegarde.renderHG(camera, &gHildegardeTexture);
 	  if(!gameOverScreenSuccess) 
-	    enemy.doThings(&proj1, &proj2, &proj3, &hildegarde, &proj4);
+	    enemy.doThings(&proj1, &proj2, &proj3, &proj4, &hildegarde, &yenisei);
 	  
 	  if(isGameOverScreen)
 	    gameOverScreen();	
@@ -241,6 +241,13 @@ void play(int levelID) {
 
 	}
 
+	if(!screenShake) {
+	  camera.x = 0;
+	  camera.y = 0;
+	} else {
+	  camera.x = rand()%30 - 15;
+	  camera.y = rand()%30 - 15;
+	}
 	clearBullets = 0;
 
 				
@@ -259,6 +266,14 @@ void play(int levelID) {
 	    //For testing
 	    if(e.key.keysym.sym == SDLK_c) {
 	      enemy.enemyDead = 1;
+	    }
+	    if(e.key.keysym.sym == SDLK_p) {
+	      if(difficulty == easy)
+		difficulty = normal;
+	      else if(difficulty == normal)
+		difficulty = hard;
+	      else
+		difficulty = easy;
 	    }
 	  }
 	    yenisei.handleEvent(e);
@@ -292,7 +307,7 @@ int main( int argc, char* args[] )
       printf( "Failed to load media!\n" );
     }
     else {
-      play(1);
+      play(2);
     }
   }
 
