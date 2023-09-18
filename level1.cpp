@@ -21,9 +21,16 @@ bool loadMedia() {
 		success = false;
 	if(!gHyacintheTexture.loadFromFile("resources/enemies/hyacinthe.png"))
 		success = false;
+	if(!gTroubadourTexture.loadFromFile("resources/enemies/troubadour.png"))
+		success = false;
+	
 	if(!gLevel1Floor.loadFromFile("resources/floor_tiles/level1.png"))
 		success = false;
+	if(!gForestFloor.loadFromFile("resources/floor_tiles/forestfloor.png"))
+		success = false;
 	if(!gLevel1Background.loadFromFile("resources/floor_tiles/level1background.png"))
+		success = false;
+	if(!gForestBackground.loadFromFile("resources/floor_tiles/forestbackground.png"))
 		success = false;
 	if(!gBullet1.loadFromFile("resources/projectiles/bullet1.png"))
 		success = false;
@@ -36,6 +43,8 @@ bool loadMedia() {
 	if(!gSnowflakeBullet.loadFromFile("resources/projectiles/snowflakebullet.png"))
 		success = false;
 	if(!gShardBullet.loadFromFile("resources/projectiles/shardbullet.png"))
+		success = false;
+	if(!gSoundBullet.loadFromFile("resources/projectiles/soundbullet.png"))
 		success = false;
 	if(!gYeniseiTexture.loadFromFile("resources/yenisei/yeniseisprites.png"))	{
 		printf( "Failed to load texture!\n" );
@@ -643,6 +652,64 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	  reset();
 	  projectile4->destroyProjs(NUM_PROJECTILES);
 	  projectile3->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    }
+    break;
+  case troubadourID:
+    
+    if(dx != 0 || dy != 0) {
+      currentClip = &gEnemyClips[1];
+      if(dx > 0)
+        currentClip = &gEnemyClips[2];
+    }
+    else {
+      if(attackAnim)
+	currentClip = &gEnemyClips[3];
+      else
+	currentClip = &gEnemyClips[0];
+      flipType = SDL_FLIP_NONE;
+    }
+    
+    switch(deaths) {
+    case 0:
+      if(!enemyDead) {
+	mMaxHitPoints = 100;
+	moveThreshold = 220;
+	if(actionTicks % moveThreshold == 0) {
+	  attackAnim = 0;
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 500);
+	  randX = rand()%(SCREEN_WIDTH - mBox.w*2) + mBox.w*2;
+	  if(abs(hildegarde->getBox().x - mBox.x) > 150)
+	    randX = hildegarde->getBox().x - mBox.w/2;
+	}
+	moveToXY(randX, 50, 8.0);
+
+	if(actionTicks > 150) {
+	  projectile4->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 20, 360.0, 0,  5.0, true);
+	  projectile4->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 20, 360.0, 0, 5.0, true);
+	  projectile2->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 160, 30.0, 0.0, 20, 15.0, false, true);
+	}
+	if(actionTicks < 200 && dx == 0 && dy == 0)
+	  attackAnim = 1;
+	
+	  
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
 	  projectile2->destroyProjs(NUM_PROJECTILES);
 	}
       }

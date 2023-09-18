@@ -3,7 +3,7 @@
 
 class Projectile; class Chara;
 
-enum enemyIDEnum {conradID, saucerID, hyacintheID};
+enum enemyIDEnum {conradID, saucerID, hyacintheID, troubadourID};
 
 class Enemy {
 public:
@@ -44,10 +44,12 @@ public:
   void setClips(int w, int h);
   bool ready;
   bool clear = 1;
-  int deaths = 5;
+  int deaths;
   SDL_RendererFlip flipType = SDL_FLIP_NONE;
   void freezeAnim();
   SDL_Rect freezeBox;
+  int spriteWidth, spriteHeight;
+  bool attackAnim;
 public:
   void set(LTexture* texture, enemyIDEnum id, int w, int h, int numClips) {
     this->gEnemyTexture = texture;

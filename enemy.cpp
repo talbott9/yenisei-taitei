@@ -1,7 +1,7 @@
 #include "enemy.h"
 
 
-Enemy enemy1, saucer, hyacinthe;
+Enemy enemy1, saucer, hyacinthe, troubadour;
 
 
 
@@ -20,9 +20,11 @@ Enemy::Enemy() {
 	enemy1.set(&gEnemy1Texture, conradID, 107, 97, 1);
 	saucer.set(&gSaucerTexture, saucerID, 107, 97, 1);
 	hyacinthe.set(&gHyacintheTexture, hyacintheID, 37, 64, 2);
+	troubadour.set(&gTroubadourTexture, troubadourID, 46, 85, 4);
 	enemy1.setClips(enemy1.mBox.w, enemy1.mBox.h);
 	saucer.setClips(saucer.mBox.w, saucer.mBox.h);
 	hyacinthe.setClips(hyacinthe.mBox.w, hyacinthe.mBox.h);
+	troubadour.setClips(troubadour.mBox.w,troubadour.mBox.h);
 }
 
 void Enemy::setClips(int w, int h) {

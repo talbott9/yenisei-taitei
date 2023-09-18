@@ -1,0 +1,2 @@
+1: making it too big would exarcebate the problems of a rectangular hitbox (diagonals being longer than the sides)
+2: fitting it exactly to the sprite would force me to make smaller sprites or bigger hitboxes

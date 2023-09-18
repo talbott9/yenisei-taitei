@@ -164,6 +164,7 @@ void play(int levelID) {
       case 0: enemy = enemy1; proj1 = projectile2; proj2 = projectile3; proj3 = projectile4; break;
       case 1: enemy = saucer; proj1 = saucerProjectile; proj2 = projectile2; proj3 = projectile3; proj4 = starProjectile1; break;
       case 2: enemy = hyacinthe; proj1 = saucerProjectile; proj2 = projectile2; proj3 = shardProjectile; proj4 = snowflakeProjectile; break;
+      case 3: enemy = troubadour; proj1 = saucerProjectile; proj2 = projectile2; proj3 = starProjectile1; proj4 = soundProjectile; break;
       }
 
       //While application is running
@@ -193,7 +194,7 @@ void play(int levelID) {
 	  SDL_SetRenderDrawColor(gRenderer, 255, 198, 104, 255);
 	  SDL_RenderFillRect(gRenderer, &backgroundColor);
 
-	  background.render(camera);
+	  background.render(camera, levelID);
 	  yenisei.move();
 	  hildegarde.moveHG();
 	  yenisei.render(camera, &gYeniseiTexture);
@@ -220,7 +221,7 @@ void play(int levelID) {
 	  SDL_SetRenderDrawColor(gRenderer, 88, 99, 100, 255);
 	  SDL_RenderFillRect(gRenderer, &backgroundColor);
 
-	  background.render(camera);
+	  background.render(camera, levelID);
 				
 	  if(!hildegarde.death) {
 	    yenisei.move();
@@ -312,7 +313,7 @@ int main( int argc, char* args[] )
       printf( "Failed to load media!\n" );
     }
     else {
-      play(2);
+      play(3);
     }
   }
 

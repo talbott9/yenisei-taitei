@@ -26,6 +26,7 @@ public:
   void moveAcc(double x, double y, double acc);
   void moveGravity(double x, double y, double acc, bool moveX = true);
   void moveAngle(double angle);
+  void moveOscillate(double x, double y, bool startRight = 1);
   void addAngle(double angle);
   double getAngle(double x, double y);
   double projectileAngle;
@@ -54,6 +55,9 @@ public:
   bool explode;
   int disableScreenShakeTicks;
   int counter;
+  int oscillationTicks, oscillationTicks2;
+  bool switchOsc;
+  bool firstOsc = 1;
 private:
   SDL_Rect mBox; 
   LTexture* gTexture;
@@ -62,7 +66,7 @@ private:
   double speed; int intv;
   int actualIntv;
   int orientation;
-  int targetX, targetY;
+  int targetX, targetY, originalTargetX, originalTargetY;
   bool shotBullet, isDead;
   Projectile* projs[NUM_PROJECTILES];
 };
