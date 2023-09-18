@@ -2,6 +2,9 @@
 #include "renderer.cpp"
 #include "button.cpp"
 
+bool screenShake, slowDown;
+double slowValue;
+
 Chara::Chara() {
   defaultPosX = DOT_WIDTH;
   posX = defaultPosX;
@@ -24,10 +27,16 @@ void Chara::handleEvent( SDL_Event& e ) {
       switch(e.key.keysym.sym) {
       case SDLK_UP: rotateDown = 1; break;
       case SDLK_DOWN: rotateUp = 1; break;
-      case SDLK_LEFT: moveLeft = true;
-	resetAnim = 1; break;
-      case SDLK_RIGHT: moveRight = true;
-	resetAnim = 1; break;
+      case SDLK_LEFT:
+	moveLeft = true;
+	if(!slowDown)
+	  resetAnim = 1;
+	break;
+      case SDLK_RIGHT:
+	moveRight = true;
+	if(!slowDown)
+	  resetAnim = 1;
+	break;
       case SDLK_z: if(attackDirection != 0)
 	  HGAttacking = 1; break;
       }
@@ -81,45 +90,90 @@ void Chara::setVel(double dx, double dy) {
 
 int frame;
 void Chara::render(SDL_Rect& camera, LTexture* gSpriteSheetTexture) {
-	if(resetAnim) {
-		count = 0; frame = 0; resetAnim = 0;
-	}
-	if(mVelX == 0.0) {
-		currentClip = &gSpriteClips[ frame ]; 
-		gSpriteSheetTexture->render( mBox.x - camera.x - DOT_WIDTH/2, mBox.y - camera.y - DOT_HEIGHT/2, currentClip ); 
-		if (count % 5 == 0 && count != 0) 
-			++frame; 
-		//Cycle animation 
-		if( count >= 55 ) { 
-			frame = 0; 
-			count = 0; 
-		} 
-		count++;
-	} else {
-		if(mVelX < 0.0) {
-			currentClip = &gSpriteClips[ frame * 2 ]; 
-			gSpriteSheetTexture->render( mBox.x - camera.x - DOT_WIDTH/2, mBox.y - camera.y - DOT_HEIGHT/2, currentClip ); 
-			if (count % 10 == 0 && count != 0) 
-				++frame; 
-			//Cycle animation 
-			if( count >= 55 ) { 
-				frame = 0; 
-				count = 0; 
-			} 
-			count++;
-		} else if(mVelX > 0.0) {
-			currentClip = &gSpriteClips[ frame * 2 ]; 
-			gSpriteSheetTexture->render( mBox.x - camera.x - DOT_WIDTH / 2, mBox.y -  camera.y - DOT_HEIGHT/2, currentClip ); 
-			if (count % 5 == 0 && count != 0) 
-				++frame; 
-			//Cycle animation 
-			if( count >= 25 ) { 
-				frame = 0; 
-				count = 0; 
-			} 
-			count++;
-		}
-	}
+  if(resetAnim) {
+    count = 0; frame = 0; resetAnim = 0;
+    count1 = 0;
+  }
+  double slow = 1;
+  if(slowDown) {
+    slow = 0.25;
+    //actualCount = count*slow;
+  }
+  int intv1 = 5/slow;
+
+  if(slowDown && !hildegarde.death) {
+    if(mVelX == 0.0) {
+      currentClip = &gSpriteClips[ frame ]; 
+      gSpriteSheetTexture->render( mBox.x - camera.x - DOT_WIDTH/2, mBox.y - camera.y - DOT_HEIGHT/2, currentClip ); 
+      if(count % intv1 == 0 && count != 0) 
+	++frame; 
+      //Cycle animation 
+      if(frame >= WALKING_ANIMATION_FRAMES) { 
+	frame = 0; 
+	count = 0; 
+      } 
+      count++;
+    } else if(mVelX > 0.0) {
+      currentClip = &gSpriteClips[ frame ]; 
+      gSpriteSheetTexture->render( mBox.x - camera.x - DOT_WIDTH/2, mBox.y - camera.y - DOT_HEIGHT/2, currentClip ); 
+      if(count % intv1*0.75 == 0 && count != 0) 
+	++frame; 
+      //Cycle animation 
+      if(frame >= WALKING_ANIMATION_FRAMES) { 
+	frame = 0; 
+	count = 0; 
+      } 
+      count++;
+    } else if(mVelX < 0.0) {
+      currentClip = &gSpriteClips[ frame ]; 
+      gSpriteSheetTexture->render( mBox.x - camera.x - DOT_WIDTH/2, mBox.y - camera.y - DOT_HEIGHT/2, currentClip ); 
+      if(count % intv1*1.25 == 0 && count != 0) 
+	++frame; 
+      //Cycle animation 
+      if(frame >= WALKING_ANIMATION_FRAMES) { 
+	frame = 0; 
+	count = 0; 
+      } 
+      count++;
+    } 
+  } else {
+    if(mVelX == 0.0) {
+      currentClip = &gSpriteClips[ frame * 2 ]; 
+      gSpriteSheetTexture->render( mBox.x - camera.x - DOT_WIDTH/2, mBox.y - camera.y - DOT_HEIGHT/2, currentClip ); 
+      if (count % 5 == 0 && count != 0) 
+	++frame; 
+      //Cycle animation 
+      if( count >= 25) { 
+	frame = 0; 
+	count = 0; 
+      } 
+      count++;
+    } else {
+      if(mVelX < 0.0) {
+	currentClip = &gSpriteClips[ frame * 2 ]; 
+	gSpriteSheetTexture->render( mBox.x - camera.x - DOT_WIDTH/2, mBox.y - camera.y - DOT_HEIGHT/2, currentClip ); 
+	if (count % 10 == 0 && count != 0) 
+	  ++frame; 
+	//Cycle animation 
+	if( count >= 55 ) { 
+	  frame = 0; 
+	  count = 0; 
+	} 
+	count++;
+      } else if(mVelX > 0.0) {
+	currentClip = &gSpriteClips[ frame * 2 ]; 
+	gSpriteSheetTexture->render( mBox.x - camera.x - DOT_WIDTH / 2, mBox.y -  camera.y - DOT_HEIGHT/2, currentClip ); 
+	if (count % 5 == 0 && count != 0) 
+	  ++frame; 
+	//Cycle animation 
+	if( count >= 25 ) { 
+	  frame = 0; 
+	  count = 0; 
+	} 
+	count++;
+      }
+    }
+  }
 }
 
 // 0 is N/A, 1 is right, 2 is diag. right, 3 is up, 4 is diag. left, 5 is left
@@ -166,8 +220,9 @@ void Chara::move() {
 	posX -= speedModX;
     }
     mBox.x = posX;
-    mVelX = DOT_VEL;
+    mVelX = 0.0;
     if(moveRight) {
+      mVelX = DOT_VEL*slow;
       posX += mVelX;
       if(posX > SCREEN_WIDTH) {
 	posX -= mVelX;
@@ -175,14 +230,16 @@ void Chara::move() {
       mBox.x = posX;
     }
     if(moveLeft) {
-      posX -= mVelX;
+      mVelX = -DOT_VEL*slow;
+      posX += mVelX;
       if(posX - 20 < 0) {
-	posX += mVelX;
+	posX -= mVelX;
       }
       mBox.x = posX;
     }
   }
   speedModX = 0.0;
+  slow = 1;
 }
 
 void Chara::moveHG() {

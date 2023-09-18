@@ -50,6 +50,7 @@ public:
   void renderHG(SDL_Rect& camera, LTexture* gSpriteSheetTexture);
 
   int count = 0;
+  int count1 = 0;
   void setState(int x);
   void setPos(int x, int y);
   void modPos(double x, double );
@@ -58,7 +59,7 @@ public:
   bool moveUp, moveDown, moveLeft, moveRight;
   bool gracePeriod;
   int graceTicks;
-  double speedModX;
+  double speedModX, slow;
   
   int animWobble;
   void shoot(Projectile* projectile, Enemy* enemy);

@@ -8,10 +8,10 @@ public:
   static const int MAX_SPEED = 6;
   void shootHG(double x, double y, Enemy* enemy);
   void shootEnemy5(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle = 360.0, double startingAngle = 0.0, int batch = 10, double spd = 5.0, bool rotate = false);
-  void shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle = 360.0, double startingAngle = 0.0, int batch = 10, double spd = 5.0, bool rotate = false, bool angleTarget = false);
+  void shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle = 360.0, double startingAngle = 0.0, int batch = 10, double spd = 5.0, bool rotate = false, bool angleTarget = false, double slow = 1);
   void shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number = 0, double sectionAngle = 0.0, int batch = 0, double spd = 0.0, bool rotate = false);
   void shootEnemy2(double x, double y, Chara* hildegarde, enemyIDEnum enemyID);
-  void shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, double velX = 0.0);
+  void shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, double velX = 0.0, double spd = 5.0, double gravityForce = 0.1, bool rotate = false);
   void shootEnemy4(double x, double y, Chara* hildegarde, enemyIDEnum enemyID);
   void setVariables(int w, int h, double spd, int interval, LTexture* gSetTexture, int orient = 0, int spriteW = 5, int spriteH = 5);
   void setProj(SDL_Rect box, double x, double y, double spd);
@@ -53,6 +53,7 @@ public:
   bool shotBatch, disabled;
   bool explode;
   int disableScreenShakeTicks;
+  int counter;
 private:
   SDL_Rect mBox; 
   LTexture* gTexture;

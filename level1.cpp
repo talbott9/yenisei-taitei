@@ -135,7 +135,8 @@ void Enemy::reset() {
   clear = 1;
   currentClip = &gEnemyClips[0];
   flipType = SDL_FLIP_NONE;
-  screenShake = 0;
+  screenShake = 0; slowDown = 0;
+  slowValue = 1.0;
 }
 
 void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Projectile* projectile4, Chara* hildegarde, Chara* yenisei) {
@@ -566,6 +567,86 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	}
       }
       break;
+    case 4:
+      if(!enemyDead) {
+	mMaxHitPoints = 30;
+	moveThreshold = 90;
+	if(actionTicks % moveThreshold == 0) {
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 400);
+	  randX = hildegarde->getBox().x - mBox.w/2;
+	}
+	
+	moveToXY(randX, randY, 8.0);
+
+
+	
+	if(actionTicks > 60) 
+	  projectile4->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 60, 45.0, 0.0, 20, 15.0, true, true);
+	
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 5:
+      if(!enemyDead) {
+	mMaxHitPoints = 50;
+	//moveThreshold = 90;
+	//if(actionTicks % moveThreshold == 0) {
+	//  changeMove = 1;
+	//  randY = rand()%(SCREEN_HEIGHT - 400);
+	//  randX = hildegarde->getBox().x - mBox.w/2;
+	//}
+	
+	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 50, 8.0);
+       
+	if(slowDown) {
+	  slowValue = 0.25;
+	  yenisei->slow = slowValue;
+	}
+
+	if(actionTicks > 180)
+	  projectile4->shootEnemy0(rand()%SCREEN_WIDTH, rand()%50 + 1, hildegarde, enemyID, 20/slowValue, 90.0, 45.0, 10, 5.0, true, false, slowValue);
+	if(actionTicks > 120)
+	  projectile2->shootEnemy0(rand()%SCREEN_WIDTH, rand()%50 + 1, hildegarde, enemyID, 20/slowValue, 90.0, 45.0, 10, 5.0, false, false, slowValue);
+	if(actionTicks > 150)
+	  projectile3->shootEnemy0(0, 0, hildegarde, enemyID, 20/slowValue, 90.0, 0.0, 10, 5.0, false, false, slowValue);
+	if(actionTicks > 180)
+	  freezeAnim();
+	if(actionTicks > 190)
+	  slowDown = 1;
+	  
+	if(actionTicks < 220)
+	  restoreHP();
+
+	//printf("%i\n", mCurrentHitPoints);
+	
+	if(clearBullets) {
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
     }
     break;
   }
@@ -576,3 +657,14 @@ void Chara::shoot(Projectile* projectile, Enemy* enemy) {
 }
 
 
+void Enemy::freezeAnim() {
+  SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
+  SDL_SetRenderDrawColor(gRenderer, 20, 70, 150, 50);
+  SDL_RenderFillRect(gRenderer, &freezeBox);
+  if(freezeBox.w < SCREEN_WIDTH + 10) {
+    freezeBox.h += 64;
+    freezeBox.y = camera.h/2 - freezeBox.h/2;
+    freezeBox.w += 64;
+    freezeBox.x = camera.w/2 - freezeBox.h/2;
+  }
+}

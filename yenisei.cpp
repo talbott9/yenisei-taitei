@@ -132,6 +132,7 @@ void resetGame(Enemy* enemy, Chara* yenisei) {
   actualScore = 0; score = 0;
   clearBullets = 1;
   screenShake = 0;
+  slowDown = 0; slowValue = 1.0;
 }
 
 void resetGamePlus() {
@@ -248,6 +249,10 @@ void play(int levelID) {
 	  camera.x = rand()%30 - 15;
 	  camera.y = rand()%30 - 15;
 	}
+
+	if(!slowDown)
+	  slowValue = 1.0;
+	
 	clearBullets = 0;
 
 				
