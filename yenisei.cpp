@@ -164,7 +164,7 @@ void play(int levelID) {
       case 0: enemy = enemy1; proj1 = projectile2; proj2 = projectile3; proj3 = projectile4; break;
       case 1: enemy = saucer; proj1 = saucerProjectile; proj2 = projectile2; proj3 = projectile3; proj4 = starProjectile1; break;
       case 2: enemy = hyacinthe; proj1 = saucerProjectile; proj2 = projectile2; proj3 = shardProjectile; proj4 = snowflakeProjectile; break;
-      case 3: enemy = troubadour; proj1 = saucerProjectile; proj2 = projectile2; proj3 = starProjectile1; proj4 = soundProjectile; break;
+      case 3: enemy = troubadour; proj1 = projectile3; proj2 = projectile2; proj3 = shardProjectile; proj4 = soundProjectile; break;
       }
 
       //While application is running

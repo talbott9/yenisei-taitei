@@ -151,6 +151,13 @@ void Enemy::renewComp(int num) {
   companions[num] = new Enemy();
 }
 
-
+void Enemy::showTime() {
+  int time = actionTicks/60;
+  gTime.loadFromRenderedText(std::to_string(time), White, 0, gBattleFontSmall);
+  if(time >= 10)
+    gTime.render(camera.w - 30, camera.y + 5);
+  else
+    gTime.render(camera.w - 20, camera.y + 5);
+}
 
 

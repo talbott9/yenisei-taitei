@@ -86,7 +86,7 @@ void gameOverScreen() {
 
 void showScore() {
 	gScore.loadFromRenderedText("Score....." + std::to_string(score), White, 0, gBattleFontSmall);
-	gScore.render(camera.y + 5, camera.x + 5);
+	gScore.render(camera.x + 5, camera.y + 5);
 	if(score < actualScore)
 		score += 20;
 }

@@ -44,12 +44,14 @@ public:
   void setClips(int w, int h);
   bool ready;
   bool clear = 1;
-  int deaths;
+  int deaths = 5;
   SDL_RendererFlip flipType = SDL_FLIP_NONE;
   void freezeAnim();
   SDL_Rect freezeBox;
   int spriteWidth, spriteHeight;
   bool attackAnim;
+  void showTime();
+  LTexture gTime;
 public:
   void set(LTexture* texture, enemyIDEnum id, int w, int h, int numClips) {
     this->gEnemyTexture = texture;

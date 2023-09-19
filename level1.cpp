@@ -125,8 +125,8 @@ void Enemy::reset() {
   deaths++;
   lastPattern = pattern;
   enemyDead = 0;
-  randX = rand()%(SCREEN_WIDTH - mBox.w) + mBox.w;
-  randY = rand()%(SCREEN_HEIGHT - 300);
+  randX = SCREEN_WIDTH/2 - mBox.w/2;
+  randY = 50;
   while(pattern == lastPattern)
     pattern = rand()%4;
   changeMove = 1; 
@@ -150,6 +150,7 @@ void Enemy::reset() {
 
 void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Projectile* projectile4, Chara* hildegarde, Chara* yenisei) {
   gEnemyTexture->render(mBox.x - camera.x, mBox.y - camera.y, currentClip, renderAngle, NULL, flipType);
+  showTime();
   actionTicks++;
   switch(enemyID) { // 0 - conrad, 1 - saucer
   case conradID:
@@ -389,7 +390,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	int goal1 = SCREEN_WIDTH - SCREEN_WIDTH/4;
 
 	if(actionTicks > 90) {
-	  projectile3->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 40, 360.0, 10);
+	  projectile3->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 40, 360.0, 10, 1.0);
 	  projectile4->shootEnemy0(companions[0]->mBox.x + companions[0]->mBox.w/2, companions[0]->mBox.y + companions[0]->mBox.h/2, hildegarde, companions[0]->enemyID, 10, 30.0, 75.0, 10, 10.0);
 	  projectile2->shootEnemy0(companions[1]->mBox.x + companions[1]->mBox.w/2, companions[1]->mBox.y + companions[1]->mBox.h/2, hildegarde, companions[1]->enemyID, 10, 30.0, 75.0, 10, 10.0);
 	} else {
@@ -674,7 +675,48 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
     }
     
     switch(deaths) {
-    case 0:
+    case 0: //Bounce 1 (gravity)
+      if(!enemyDead) {
+	mMaxHitPoints = 100;
+	/*moveThreshold = 220;
+	if(actionTicks % moveThreshold == 0) {
+	  attackAnim = 0;
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 500);
+	  randX = rand()%(SCREEN_WIDTH - mBox.w*2) + mBox.w*2;
+	  if(abs(hildegarde->getBox().x - mBox.x) > 150)
+	    randX = hildegarde->getBox().x - mBox.w/2;
+	    }*/
+	randX = SCREEN_WIDTH/2 - mBox.w/2;
+	randY = 50;
+	moveToXY(randX, randY, 16.0);
+
+	if(actionTicks > 60) {
+	  projectile4->shootEnemy3(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 0.0, 5.0, 0.2, true, 10);
+	} else {
+	  restoreHP();
+	}
+	
+	if(actionTicks < 200 && dx == 0 && dy == 0)
+	  attackAnim = 1;
+	
+	  
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 1: //Sound wave: vertical
       if(!enemyDead) {
 	mMaxHitPoints = 100;
 	moveThreshold = 220;
@@ -688,7 +730,8 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	}
 	moveToXY(randX, 50, 8.0);
 
-	if(actionTicks > 150) {
+	if(actionTicks > 60) {
+	  projectile4->horizontalOsc = 0;
 	  projectile4->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 20, 360.0, 0,  5.0, true);
 	  projectile4->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 20, 360.0, 0, 5.0, true);
 	  projectile2->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 160, 30.0, 0.0, 20, 15.0, false, true);
@@ -714,6 +757,192 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	}
       }
       break;
+    
+    case 2: //Bounce 2 (fast)
+      if(!enemyDead) {
+	mMaxHitPoints = 200;
+	moveThreshold = 220;
+	if(actionTicks % moveThreshold == 0) {
+	  attackAnim = 0;
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 500);
+	  randX = rand()%(200) + hildegarde->getBox().x - 100;
+	  if(randX > SCREEN_WIDTH - mBox.w)
+	    randX = SCREEN_WIDTH - mBox.w;
+	  else if(randX < 0)
+	    randX = 0 + mBox.w;
+	}
+	moveToXY(randX, 50, 8.0);
+
+	if(actionTicks > 60) {
+	  projectile4->shootEnemy5(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 250, 360.0, 0.0, 50, 2.0, false);
+	}
+	
+	if(actionTicks < 200 && dx == 0 && dy == 0)
+	  attackAnim = 1;
+	
+	  
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 3: //Sound wave: horizontal
+      if(!enemyDead) {
+	mMaxHitPoints = 200;
+	/*moveThreshold = 220;
+	if(actionTicks % moveThreshold == 0) {
+	  attackAnim = 0;
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 500);
+	  randX = rand()%(SCREEN_WIDTH - mBox.w*2) + mBox.w*2;
+	  if(abs(hildegarde->getBox().x - mBox.x) > 150)
+	    randX = hildegarde->getBox().x - mBox.w/2;
+	    }*/
+	moveToXY(0, SCREEN_HEIGHT - mBox.h - 50, 16.0);
+
+	if(actionTicks > 150) {
+	  projectile4->horizontalOsc = 1;
+	  projectile4->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 20, 360.0, 0,  5.0, true);
+	  projectile4->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 20, 360.0, 0, 5.0, true);
+	} else {
+	  restoreHP();
+	}
+
+	if(actionTicks > 280) {
+	  projectile3->shootEnemy0(rand()%(SCREEN_WIDTH/2) + SCREEN_WIDTH/4, rand()%(SCREEN_HEIGHT/16), hildegarde, enemyID, 60, 0.0, 0.0, 10, 20.0, false, true);
+	  //attackAnim = 0;
+	}
+	
+	if(actionTicks < 200 && dx == 0 && dy == 0)
+	  attackAnim = 1;
+	
+	  
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	}
+
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 4: //Bounce 3 (shoot)
+      if(!enemyDead) {
+	mMaxHitPoints = 200;
+	moveThreshold = 220;
+	if(actionTicks % moveThreshold == 0) {
+	  attackAnim = 0;
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 500);
+	  randX = rand()%(200) + hildegarde->getBox().x - 100;
+	  if(randX > SCREEN_WIDTH - mBox.w)
+	    randX = SCREEN_WIDTH - mBox.w;
+	  else if(randX < 0)
+	    randX = 0 + mBox.w;
+	}
+	moveToXY(randX, 50, 9.0);
+
+	if(actionTicks > 150) {
+	  projectile4->shootEnemy5(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 125, 360.0, 0.0, 25, 2.0, false);
+	  projectile2->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 125, 0.0, 0.0, 10, 15.0, false, true);
+	}
+	
+	if(actionTicks < 200 && dx == 0 && dy == 0)
+	  attackAnim = 1;
+	
+	  
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 5: //Sound ripples
+      if(!enemyDead) {
+	mMaxHitPoints = 100;
+	moveThreshold = 220;
+	if(actionTicks % moveThreshold == 0) {
+	  attackAnim = 0;
+	  changeMove = 1;
+	  /*randY = rand()%(SCREEN_HEIGHT - 500);
+	  randX = rand()%(200) + hildegarde->getBox().x - 100;
+	  if(randX > SCREEN_WIDTH - mBox.w)
+	    randX = SCREEN_WIDTH - mBox.w;
+	  else if(randX < 0)
+	  randX = 0 + mBox.w;*/
+	}
+	moveToXY(randX, 100, 8.0);
+
+	double angleProj = actionTicks*10;
+	if(actionTicks > 60) 
+	  projectile2->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 3, angleProj, angleProj, 1, 5.0, false, false);
+	
+	if(actionTicks > 60)
+	  projectile4->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 10, angleProj+5, angleProj+5, 2, 2.5, true, false);
+
+	if(actionTicks > 150)
+	  projectile1->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, saucerID, 160, 360.0, 10, 0.25);
+	else
+	  restoreHP();
+
+	//printf("%i\n", mCurrentHitPoints);
+	
+	if(actionTicks < 200 && dx == 0 && dy == 0)
+	  attackAnim = 1;
+	
+	  
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	  projectile1->destroyProjs(NUM_PROJECTILES);
+	}
+
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	  projectile1->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    
     }
     break;
   }

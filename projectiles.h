@@ -11,7 +11,7 @@ public:
   void shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle = 360.0, double startingAngle = 0.0, int batch = 10, double spd = 5.0, bool rotate = false, bool angleTarget = false, double slow = 1);
   void shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number = 0, double sectionAngle = 0.0, int batch = 0, double spd = 0.0, bool rotate = false);
   void shootEnemy2(double x, double y, Chara* hildegarde, enemyIDEnum enemyID);
-  void shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, double velX = 0.0, double spd = 5.0, double gravityForce = 0.1, bool rotate = false);
+  void shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, double velX = 0.0, double spd = 5.0, double gravityForce = 0.1, bool rotate = false, int number = 10);
   void shootEnemy4(double x, double y, Chara* hildegarde, enemyIDEnum enemyID);
   void setVariables(int w, int h, double spd, int interval, LTexture* gSetTexture, int orient = 0, int spriteW = 5, int spriteH = 5);
   void setProj(SDL_Rect box, double x, double y, double spd);
@@ -56,8 +56,9 @@ public:
   int disableScreenShakeTicks;
   int counter;
   int oscillationTicks, oscillationTicks2;
-  bool switchOsc;
+  bool switchOsc, horizontalOsc;
   bool firstOsc = 1;
+  int bouncesOffScreen = 0;
 private:
   SDL_Rect mBox; 
   LTexture* gTexture;
