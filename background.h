@@ -1,3 +1,5 @@
+#define NUM_TILES 300
+
 class Background { 
 public:
   Background();
@@ -6,6 +8,13 @@ public:
   SDL_Rect floor;
   SDL_Rect getBox();
   void addXY(int x, int y);
+  SDL_Rect mBox;
+  void createTiles(int num);
+  bool createdTiles;
+  int tileXMultiplier = 0;
+  void renderTiles(int startX, int startY, int num);
+  LTexture gTexture;
+  Background* tiles[NUM_TILES];
 private:
   int backgroundTicks = 0;
 };
@@ -14,3 +23,4 @@ LTexture gBackground; LTexture gBackgroundSup;
 LTexture gFloor; LTexture gFloorSup;
 LTexture gLevel1Background, gForestBackground;
 LTexture gLevel1Floor, gForestFloor;
+LTexture gDesertTile, gDesertTile1, gDesertTower;

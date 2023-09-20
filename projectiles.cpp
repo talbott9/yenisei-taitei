@@ -5,7 +5,7 @@
 
 bool clearBullets;
 
-Projectile projectile2, projectile3, projectile4, projectile5, saucerProjectile, starProjectile1, snowflakeProjectile, shardProjectile, soundProjectile, projectileHG;
+Projectile projectile2, projectile3, projectile4, projectile5, saucerProjectile, starProjectile1, snowflakeProjectile, shardProjectile, soundProjectile, daggerProjectile, projectileHG;
 
 SDL_Rect laserBoxes[NUM_PROJECTILES];
 
@@ -22,6 +22,7 @@ Projectile::Projectile() {
   snowflakeProjectile.setVariables(8, 8, 6.0, 10, &gSnowflakeBullet, 0, 15, 15);
   shardProjectile.setVariables(7, 7, 6.0, 10, &gShardBullet, 0, 25, 25);
   soundProjectile.setVariables(15, 15, 6.0, 10, &gSoundBullet, 0, 25, 25);
+  daggerProjectile.setVariables(3, 3, 6.0, 10, &gDaggerBullet, 0, 25, 25);
 }
 
 void Projectile::setProj(SDL_Rect box, double x, double y, double spd) {

@@ -23,7 +23,8 @@ bool loadMedia() {
 		success = false;
 	if(!gTroubadourTexture.loadFromFile("resources/enemies/troubadour.png"))
 		success = false;
-	
+	if(!gBohemondTexture.loadFromFile("resources/enemies/bohemond.png"))
+	  success = false;
 	if(!gLevel1Floor.loadFromFile("resources/floor_tiles/level1.png"))
 		success = false;
 	if(!gForestFloor.loadFromFile("resources/floor_tiles/forestfloor.png"))
@@ -31,6 +32,12 @@ bool loadMedia() {
 	if(!gLevel1Background.loadFromFile("resources/floor_tiles/level1background.png"))
 		success = false;
 	if(!gForestBackground.loadFromFile("resources/floor_tiles/forestbackground.png"))
+		success = false;
+	if(!gDesertTile.loadFromFile("resources/floor_tiles/deserttile.png"))
+		success = false;
+	if(!gDesertTile1.loadFromFile("resources/floor_tiles/deserttile1.png"))
+		success = false;
+	if(!gDesertTower.loadFromFile("resources/floor_tiles/deserttower.png"))
 		success = false;
 	if(!gBullet1.loadFromFile("resources/projectiles/bullet1.png"))
 		success = false;
@@ -45,6 +52,8 @@ bool loadMedia() {
 	if(!gShardBullet.loadFromFile("resources/projectiles/shardbullet.png"))
 		success = false;
 	if(!gSoundBullet.loadFromFile("resources/projectiles/soundbullet.png"))
+		success = false;
+	if(!gDaggerBullet.loadFromFile("resources/projectiles/daggerbullet.png"))
 		success = false;
 	if(!gYeniseiTexture.loadFromFile("resources/yenisei/yeniseisprites.png"))	{
 		printf( "Failed to load texture!\n" );
@@ -718,7 +727,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
       break;
     case 1: //Sound wave: vertical
       if(!enemyDead) {
-	mMaxHitPoints = 100;
+	mMaxHitPoints = 150;
 	moveThreshold = 220;
 	if(actionTicks % moveThreshold == 0) {
 	  attackAnim = 0;
@@ -907,10 +916,10 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 
 	double angleProj = actionTicks*10;
 	if(actionTicks > 60) 
-	  projectile2->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 3, angleProj, angleProj, 1, 5.0, false, false);
+	  projectile2->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, enemyID, 3, angleProj, angleProj, 1, 5.0, false, false);
 	
 	if(actionTicks > 60)
-	  projectile4->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 10, angleProj+5, angleProj+5, 2, 2.5, true, false);
+	  projectile4->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, enemyID, 10, angleProj+5, angleProj+5, 2, 2.5, true, false);
 
 	if(actionTicks > 150)
 	  projectile1->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, saucerID, 160, 360.0, 10, 0.25);
@@ -945,6 +954,59 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
     
     }
     break;
+  case bohemondID:
+    
+    if(dx != 0 || dy != 0) {
+      currentClip = &gEnemyClips[1];
+      if(dx < 0)
+	flipType = SDL_FLIP_HORIZONTAL;
+      else
+	flipType = SDL_FLIP_NONE;
+    }
+    else {
+      currentClip = &gEnemyClips[0];
+      flipType = SDL_FLIP_NONE;
+    }
+    
+    switch(deaths) {
+    case 0:
+      if(!enemyDead) {
+	mMaxHitPoints = 100;
+	moveThreshold = 220;
+	if(actionTicks % moveThreshold == 0) {
+	  attackAnim = 0;
+	  changeMove = 1;
+	  randY = rand()%(SCREEN_HEIGHT - 500);
+	  randX = rand()%(SCREEN_WIDTH - mBox.w*2) + mBox.w*2;
+	  if(randX > SCREEN_WIDTH - mBox.w)
+	    randX = SCREEN_WIDTH - mBox.w;
+	}
+	moveToXY(randX, randY, 8.0);
+
+	double angleProj = actionTicks*10;
+	if(actionTicks > 60) 
+	  projectile4->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, troubadourID, 10, angleProj, angleProj, 7, 7.0, false, false);	if(actionTicks > 60) {
+	} else {
+	  restoreHP();
+	}
+	
+	  
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    }
   }
 }
 

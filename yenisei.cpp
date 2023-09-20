@@ -165,6 +165,7 @@ void play(int levelID) {
       case 1: enemy = saucer; proj1 = saucerProjectile; proj2 = projectile2; proj3 = projectile3; proj4 = starProjectile1; break;
       case 2: enemy = hyacinthe; proj1 = saucerProjectile; proj2 = projectile2; proj3 = shardProjectile; proj4 = snowflakeProjectile; break;
       case 3: enemy = troubadour; proj1 = projectile3; proj2 = projectile2; proj3 = shardProjectile; proj4 = soundProjectile; break;
+      case 4: enemy = bohemond; proj1 = projectile3; proj2 = projectile2; proj3 = shardProjectile; proj4 = daggerProjectile; break;
       }
 
       //While application is running
@@ -313,7 +314,7 @@ int main( int argc, char* args[] )
       printf( "Failed to load media!\n" );
     }
     else {
-      play(3);
+      play(4);
     }
   }
 

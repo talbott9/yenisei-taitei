@@ -1,11 +1,23 @@
 #include "background.h"
 
+Background background;
+Background desertTile, desertTile1, desertTower;
+
 
 Background::Background() {
 	background.x = 0; background.y = 0;
 	background.w = 1600; background.h = 600;
 	floor.w = 800; floor.h = 80;
-	floor.x = 0; floor.y = SCREEN_HEIGHT - 80;
+	floor.x = 0; floor.y = SCREEN_HEIGHT - 80;\
+	desertTile.mBox.x = 0; desertTile.mBox.y = 0;
+	desertTile.mBox.w = 32; desertTile.mBox.h = 32;
+	desertTile.gTexture = gDesertTile;
+	desertTile1.mBox.x = 0; desertTile1.mBox.y = 0;
+	desertTile1.mBox.w = 32; desertTile1.mBox.h = 32;
+	desertTile1.gTexture = gDesertTile1;
+	desertTower.mBox.x = 0; desertTower.mBox.y = 0;
+	desertTower.mBox.w = 126 + 100; desertTower.mBox.h = 406;
+	desertTower.gTexture = gDesertTower;
 }
 
 SDL_Rect Background::getBox() {
@@ -19,6 +31,9 @@ void Background::addXY(int x, int y) {
 
 void Background::render(SDL_Rect& camera, int levelID) {
 	backgroundTicks++;
+		  
+	int intvFloor = 1/slowValue;
+	int intvBackground = 25/slowValue;
 
 	switch(levelID) {
 	case 3:
@@ -27,6 +42,31 @@ void Background::render(SDL_Rect& camera, int levelID) {
 	  gBackground = gForestBackground;	
 	  gBackgroundSup = gForestBackground;
 	  floor.h = 300;
+	  break;
+	case 4:
+	  //gFloor = gLevel1Floor;	
+	  //gFloorSup = gLevel1Floor;	
+	  //gBackground = gLevel1Background;	
+	  //gBackgroundSup = gLevel1Background;
+	  desertTile.renderTiles(desertTile.mBox.x - camera.x, camera.y + 300, NUM_TILES);
+	  if(backgroundTicks % 1 == 0)
+	    desertTile.mBox.x -= 5/intvFloor;
+	  if(desertTile.mBox.x <= -desertTile.mBox.w)
+	    desertTile.mBox.x = 0;
+
+	  
+	  desertTower.renderTiles(desertTower.mBox.x - camera.x, camera.y + camera.h-desertTower.mBox.h, 5);
+	  if(backgroundTicks % 1 == 0)
+	    desertTower.mBox.x -= 5/intvFloor;
+	  if(desertTower.mBox.x <= -desertTower.mBox.w)
+	    desertTower.mBox.x = 0;
+	  
+	  desertTile1.renderTiles(desertTile1.mBox.x - camera.x, camera.y + camera.h-desertTile1.mBox.h, NUM_TILES);
+	  if(backgroundTicks % 1 == 0)
+	    desertTile1.mBox.x -= 5/intvFloor;
+	  if(desertTile1.mBox.x <= -desertTile1.mBox.w)
+	    desertTile1.mBox.x = 0;
+
 	  break;
 	default:
 	  gFloor = gLevel1Floor;	
@@ -37,9 +77,7 @@ void Background::render(SDL_Rect& camera, int levelID) {
 	}
 
 	floor.y =  SCREEN_HEIGHT - floor.h;
-	  
-	int intvFloor = 1/slowValue;
-	int intvBackground = 25/slowValue;
+
 	gBackground.render(background.x, background.y);
 	gBackgroundSup.render(background.x + background.w, background.y);
 	gFloor.render(floor.x - camera.x, floor.y - camera.y);
@@ -56,4 +94,31 @@ void Background::render(SDL_Rect& camera, int levelID) {
 		floor.x = 0;
 }
 
-Background background;
+
+void Background::createTiles(int num) {
+  if(!createdTiles) {
+    for(int i = 0; i < num; i++) {
+      tiles[i] = new Background();
+      tiles[i]->mBox = mBox;
+    }
+    createdTiles = 1;
+  }
+}
+
+void Background::renderTiles(int startX, int startY, int num) {
+  createTiles(num);
+  SDL_Rect camera2 = camera;
+  camera2.w += mBox.w;
+  for(int i = 0; i < num; i++) {
+    tiles[i]->mBox.x = (tiles[i]->mBox.w*tileXMultiplier);
+    if(checkCollision(camera2, tiles[i]->mBox)) {
+      gTexture.render((startX - camera.x) + tiles[i]->mBox.x, startY);
+      tileXMultiplier++;
+    } else {
+      startY += tiles[i]->mBox.h;
+      tileXMultiplier = 0;
+    }
+    //printf("%b, %i, %i\n", checkCollision(camera, tiles[i]->mBox), camera.w);
+  }
+  tileXMultiplier = 0;
+}
