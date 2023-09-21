@@ -22,10 +22,10 @@ Projectile::Projectile() {
   snowflakeProjectile.setVariables(8, 8, 6.0, 10, &gSnowflakeBullet, 0, 15, 15);
   shardProjectile.setVariables(7, 7, 6.0, 10, &gShardBullet, 0, 25, 25);
   soundProjectile.setVariables(15, 15, 6.0, 10, &gSoundBullet, 0, 25, 25);
-  daggerProjectile.setVariables(3, 3, 6.0, 10, &gDaggerBullet, 0, 25, 25);
+  daggerProjectile.setVariables(5, 5, 6.0, 10, &gDaggerBullet, 0, 25, 25, true);
 }
 
-void Projectile::setProj(SDL_Rect box, double x, double y, double spd) {
+void Projectile::setProj(SDL_Rect box, double x, double y, double spd, bool isLong) {
   posX = x;
   posY = y;
   mBox.x = posX;
@@ -35,10 +35,11 @@ void Projectile::setProj(SDL_Rect box, double x, double y, double spd) {
   defaultPosX = posX;
   defaultPosY = posY;
   speed = spd;
+  projectileIsLong = isLong;
 }
 
 
-void Projectile::setVariables(int w, int h, double spd, int interval, LTexture* gSetTexture, int orient, int spriteW, int spriteH) {
+void Projectile::setVariables(int w, int h, double spd, int interval, LTexture* gSetTexture, int orient, int spriteW, int spriteH, bool isLong) {
   gTexture = gSetTexture;
   mBox.w = w; mBox.h = h;
   speed = spd;
@@ -46,6 +47,7 @@ void Projectile::setVariables(int w, int h, double spd, int interval, LTexture* 
   orientation = orient;
   spriteWidth = spriteW;
   spriteHeight = spriteH;
+  projectileIsLong = isLong;
 }
 int Projectile::getSpd() {
 	return speed;
@@ -75,7 +77,7 @@ void Projectile::shootHG(double x, double y, Enemy* enemy) {
     projectileTicks = 0;
   
   if(HGAttacking && projectileTicks % actualIntv == 0) {
-    projs[projectilesShot]->setProj(mBox, x, y, spd);
+    projs[projectilesShot]->setProj(mBox, x, y, spd, projectileIsLong);
     switch(attackDirection) {
     case 0:
       break;
@@ -115,7 +117,7 @@ void Projectile::shootHG(double x, double y, Enemy* enemy) {
   //printf("%i\n", attackDirection);
   
   for(int i = 0; i < NUM_PROJECTILES; i++) {
-    if(checkCollision(enemy->getBox(), projs[i]->mBox)) {
+    if(checkCollision(enemy->getBox(), projs[i]->mBox) && (projs[i]->dx != 0 || projs[i]->dy != 0)) {
       enemy->takeDamage();
       projs[i]->clearProjectilesPlus();
     }
@@ -287,8 +289,8 @@ void Projectile::moveAngle(double angle) {
     dx = speed*cosAngle;
     dy = speed*sinAngle;
     shotBullet = 1;
-    targetX = posX+dx;
-    targetY = posY+dy;
+    targetX = posX+dx*10;
+    targetY = posY+dy*10;
   }
 }
 
@@ -299,7 +301,10 @@ double Projectile::getAngle(double x, double y) {
   double side2 = posX - x;
   double r = sqrt(side1 * side1 + side2 * side2);
   double cosAngle = (side2/r);
-  angle = (std::acos(cosAngle)/PI*180.0 - 180) * -1;
+  if(r == 0)
+    angle = 90.0;
+  else
+    angle = ((std::acos(cosAngle)/PI*180.0) - 180.0) * -1.0;
   return angle;
 }
 
@@ -351,7 +356,7 @@ void Projectile::moveGravity(double x, double y, double acc, bool moveX) {
   dy += acc*gravityTicks;
 }
 
-void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, double startingAngle, int batch, double spd, bool rotate, bool angleTarget, double slow) {
+void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, double startingAngle, int batch, double spd, bool rotate, bool angleTarget, double slow, bool shootBool) {
   defaultPosX = x; defaultPosY = y;
 
   if(clearBullets)
@@ -576,7 +581,7 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
     else if(difficulty == 2)
       actualIntv = number/2;
 
-    if(projectileTicks % actualIntv == 0) {
+    if(projectileTicks % actualIntv == 0 || shootBool) {
       for(int i = 0; i < batch; i++) {
 	//printf("enemyshot %i\n", projectilesShot);
 	projs[projectilesShot]->posX = defaultPosX;
@@ -592,21 +597,23 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
 	  double thing1 = i;
 	  double thing2 = batch;
 	  double thing = (thing1/thing2);
-	  projs[projectilesShot]->speed = spd-(thing*10);
+	  projs[projectilesShot]->speed = spd+(thing*10);
 	}
 	projs[projectilesShot]->targetX = hildegarde->getX();
 	projs[projectilesShot]->targetY = hildegarde->getY();
+	
 	if(angleTarget) {
 	  if(counter == 0)
 	    projs[projectilesShot]->moveToXY(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
 	  else if(counter == 1)
-	    projs[projectilesShot]->moveAngle(+projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) - sectionAngle/2);
+	    projs[projectilesShot]->moveAngle(projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) - sectionAngle/2);
 	  else if(counter == 2) 
-	    projs[projectilesShot]->moveAngle(+projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) + sectionAngle/2);
+	    projs[projectilesShot]->moveAngle(projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) + sectionAngle/2);
 	  if(counter != 2)
 	    counter++;
 	  else
 	    counter = 0;
+	  projs[projectilesShot]->angle = projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
 	} else {
 	  projs[projectilesShot]->moveAngle(projectileAngle+startingAngle);
 	  if(!rotate)
@@ -624,8 +631,6 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
 	  if(projectileAngle > sectionAngle)
 	    projectileAngle = 0;
 	}
-
-	projs[projectilesShot]->angle = projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
 	
 	projectilesShot++;
 	if(projectilesShot >= NUM_PROJECTILES)
@@ -649,12 +654,107 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
 	renewProj(i);
 	//projs[i]->clearProjectilesPlus();
       }
-      if(projs[i]->dx != 0 || projs[i]->dy != 0) {
-	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w/2 - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/2 - camera.y, NULL, projs[i]->angle);
+      if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
+	gTexture->render(projs[i]->mBox.x - projs[i]->mBox.w - camera.x, projs[i]->mBox.y - projs[i]->mBox.h/2 - camera.y, NULL, projs[i]->angle);
         projs[i]->checkDiePlus(hildegarde);
-	//SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
-	//SDL_Rect box = projs[i]->mBox;
-	//SDL_RenderFillRect(gRenderer, &box);
+	SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
+	SDL_RenderFillRect(gRenderer, &projs[i]->mBox);
+      }
+    }
+    projectileTicks++;
+    break;
+  case bohemondID:  //Saucer enemy ID
+    //difficulty = 2; // delete
+    actualIntv = number;
+    if(difficulty == 0)
+      actualIntv = number;
+    else if(difficulty == 1)
+      actualIntv = number/1.5;
+    else if(difficulty == 2)
+      actualIntv = number/2;
+
+    if(projectileTicks % actualIntv == 0 || shootBool) {
+      for(int i = 0; i < batch; i++) {
+	//printf("enemyshot %i\n", projectilesShot);
+	projs[projectilesShot]->posX = defaultPosX;
+	projs[projectilesShot]->posY = defaultPosY;
+	projs[projectilesShot]->defaultPosX = defaultPosX;
+	projs[projectilesShot]->defaultPosY = defaultPosY;
+	projs[projectilesShot]->mBox.w = mBox.w;
+	projs[projectilesShot]->mBox.h = mBox.h;
+	projs[projectilesShot]->mBox.x = projs[projectilesShot]->posX;
+	projs[projectilesShot]->mBox.y = projs[projectilesShot]->posY;
+	projs[projectilesShot]->speed = spd;
+	if(angleTarget) {
+	  double thing1 = i;
+	  double thing2 = batch;
+	  double thing = (thing1/thing2);
+	  projs[projectilesShot]->speed = spd+(thing*10);
+	}
+	projs[projectilesShot]->targetX = hildegarde->getX();
+	projs[projectilesShot]->targetY = hildegarde->getY();
+	
+	if(angleTarget) {
+	  if(counter == 0)
+	    projs[projectilesShot]->moveToXY(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
+	  else if(counter == 1)
+	    projs[projectilesShot]->moveAngle(projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) - projectileAngle);
+	  else if(counter == 2) 
+	    projs[projectilesShot]->moveAngle(projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY) + projectileAngle);
+	  if(counter != 2)
+	    counter++;
+	  else
+	    counter = 0;
+	  projs[projectilesShot]->angle = projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
+	} else {
+	  projs[projectilesShot]->moveAngle(projectileAngle+startingAngle);
+	  if(!rotate)
+	    projs[projectilesShot]->angle = projs[projectilesShot]->getAngle(projs[projectilesShot]->targetX, projs[projectilesShot]->targetY);
+	}
+	
+	//printf("%f, %i, %f, %f\n", projectileAngle, projectilesShot, projs[projectilesShot]->dx, projs[projectilesShot]->dy);
+	
+	if(sectionAngle == 360.0) {
+	  projectileAngle += sectionAngle/batch;
+	  if(projectileAngle > sectionAngle)
+	    projectileAngle = sectionAngle/batch;
+	} else {
+	  projectileAngle += sectionAngle/(batch-1);
+	  if(projectileAngle > sectionAngle)
+	    projectileAngle = 0;
+	}
+	
+	projectilesShot++;
+	if(projectilesShot >= NUM_PROJECTILES)
+	  projectilesShot = 0;
+      }
+    }
+    for(int i = 0; i < NUM_PROJECTILES; i++) {
+      if(checkCollision(projs[i]->mBox, camera) && (projs[i]->dx != 0.0 || projs[i]->dy != 0.0)) {
+	projs[i]->posX += projs[i]->dx*slow;
+	projs[i]->posY += projs[i]->dy*slow;
+	//printf("%f, %f, %f\n", projs[i]->dx*slow, projs[i]->dy*slow, slow);
+	
+	projs[i]->mBox.x = projs[i]->posX;
+	projs[i]->mBox.y = projs[i]->posY;
+	if(rotate) {
+	  projs[i]->angle += 5.0*slow;
+	  if(projs[i]->angle == 360)
+	    projs[i]->angle = 0.0;
+	}
+	if(projectileIsLong) {
+	  projs[i]->setLongProjBox();
+	}
+      } else {
+	renewProj(i);
+	//projs[i]->clearProjectilesPlus();
+      }
+      if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
+	gTexture->render(projs[i]->mBox.x - spriteWidth/2 + 2 - camera.x, projs[i]->mBox.y - spriteHeight/2 - camera.y, NULL, projs[i]->angle);
+        projs[i]->checkDiePlus(hildegarde);
+	SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
+	SDL_RenderFillRect(gRenderer, &projs[i]->mBox);
+	SDL_RenderFillRect(gRenderer, &projs[i]->mBox1);
       }
     }
     projectileTicks++;
@@ -1626,7 +1726,9 @@ void Projectile::shootEnemy5(double x, double y, Chara* hildegarde, enemyIDEnum 
 
 int deaths;
 void Projectile::checkDiePlus(Chara* hildegarde) {
-  if(checkCollision(hildegarde->getBox(), mBox) && !hildegarde->death) {
+  if(checkCollision(hildegarde->getBox(), mBox) ||
+     (checkCollision(hildegarde->getBox(), mBox1) && projectileIsLong)
+     && !hildegarde->death) {
     hildegarde->death = 1;
     deaths++;
     //printf("Bullet collides with Hildegarde %f, %f, %f, %f #%i\n", posX, posY, dx, dy, deaths);
@@ -1659,6 +1761,7 @@ void Projectile::clearProjectilesPlus() {
   angle = 0.0;
   mBox.x = posX;
   mBox.y = posY;
+  mBox1 = mBox;
   dx = 0.0; dy = 0.0;
   shotBullet = 0;
   moveGravityBullet = 0;
@@ -1679,7 +1782,7 @@ void Projectile::createProjs(int num) {
   if(!createdProjs) {
     for(int i = 0; i < num; i++) {
       projs[i] = new Projectile();
-      projs[i]->setProj(mBox, posX, posY, speed);
+      projs[i]->setProj(mBox, posX, posY, speed, projectileIsLong);
     }
     //printf("created bullets #%i, %i, %i\n", num, mBox.w, mBox.h);
     createdProjs = 1;
@@ -1700,5 +1803,32 @@ void Projectile::destroyProjs(int num) {
 void Projectile::renewProj(int num) {
   delete projs[num];
   projs[num] = new Projectile();
-  projs[num]->setProj(mBox, posX, posY, speed);
+  projs[num]->setProj(mBox, posX, posY, speed, projectileIsLong);
+}
+
+void Projectile::setLongProjBox() {
+  double otherPosX, otherPosY;
+  otherPosX = posX;
+  otherPosY = posY;
+  mBox1 = mBox;
+  if(dx >= 1 || dx <= -1) {
+    if(!(angle > 75 && angle < 105)) {
+      while(abs(otherPosX - posX) < mBox.w) 
+	otherPosX += dx;
+    }
+  } else if(!(angle > 75 && angle < 105)) {
+        otherPosX += mBox.w*dx;
+  }
+  
+  if(dy >= 1 || dy <= -1) {
+    if(!(angle < 45) && !(angle > 135)) {
+      while(abs(otherPosY - posY) < mBox.h) 
+	otherPosY += dy;
+    }
+  } else if(!(angle < 45) && !(angle > 135)) {
+    otherPosY += mBox.h*dy;
+  }
+	  
+  mBox1.x = otherPosX;
+  mBox1.y = otherPosY;
 }

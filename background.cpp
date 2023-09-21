@@ -1,7 +1,7 @@
 #include "background.h"
 
 Background background;
-Background desertTile, desertTile1, desertTower;
+Background desertTile, desertTile1, desertTower, backgroundMoon;
 
 
 Background::Background() {
@@ -10,14 +10,17 @@ Background::Background() {
 	floor.w = 800; floor.h = 80;
 	floor.x = 0; floor.y = SCREEN_HEIGHT - 80;\
 	desertTile.mBox.x = 0; desertTile.mBox.y = 0;
-	desertTile.mBox.w = 32; desertTile.mBox.h = 32;
+	desertTile.mBox.w = 30; desertTile.mBox.h = 32;
 	desertTile.gTexture = gDesertTile;
 	desertTile1.mBox.x = 0; desertTile1.mBox.y = 0;
-	desertTile1.mBox.w = 32; desertTile1.mBox.h = 32;
+	desertTile1.mBox.w = 30; desertTile1.mBox.h = 32;
 	desertTile1.gTexture = gDesertTile1;
 	desertTower.mBox.x = 0; desertTower.mBox.y = 0;
-	desertTower.mBox.w = 126 + 100; desertTower.mBox.h = 406;
+	desertTower.mBox.w = 125 + 100; desertTower.mBox.h = 406;
 	desertTower.gTexture = gDesertTower;
+	desertTower.renderVertically = 0;
+
+	backgroundColor = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
 }
 
 SDL_Rect Background::getBox() {
@@ -44,10 +47,9 @@ void Background::render(SDL_Rect& camera, int levelID) {
 	  floor.h = 300;
 	  break;
 	case 4:
-	  //gFloor = gLevel1Floor;	
-	  //gFloorSup = gLevel1Floor;	
-	  //gBackground = gLevel1Background;	
-	  //gBackgroundSup = gLevel1Background;
+	  SDL_SetRenderDrawColor(gRenderer, 0, 0, 50, 255);
+	  SDL_RenderFillRect(gRenderer, &backgroundColor);
+	  
 	  desertTile.renderTiles(desertTile.mBox.x - camera.x, camera.y + 300, NUM_TILES);
 	  if(backgroundTicks % 1 == 0)
 	    desertTile.mBox.x -= 5/intvFloor;
@@ -55,7 +57,7 @@ void Background::render(SDL_Rect& camera, int levelID) {
 	    desertTile.mBox.x = 0;
 
 	  
-	  desertTower.renderTiles(desertTower.mBox.x - camera.x, camera.y + camera.h-desertTower.mBox.h, 5);
+	  desertTower.renderTiles(desertTower.mBox.x - camera.x, camera.y + camera.h-desertTower.mBox.h, 10);
 	  if(backgroundTicks % 1 == 0)
 	    desertTower.mBox.x -= 5/intvFloor;
 	  if(desertTower.mBox.x <= -desertTower.mBox.w)
@@ -66,6 +68,8 @@ void Background::render(SDL_Rect& camera, int levelID) {
 	    desertTile1.mBox.x -= 5/intvFloor;
 	  if(desertTile1.mBox.x <= -desertTile1.mBox.w)
 	    desertTile1.mBox.x = 0;
+
+	  gBackgroundMoon.render(SCREEN_WIDTH - 150, 50);
 
 	  break;
 	default:
@@ -114,7 +118,7 @@ void Background::renderTiles(int startX, int startY, int num) {
     if(checkCollision(camera2, tiles[i]->mBox)) {
       gTexture.render((startX - camera.x) + tiles[i]->mBox.x, startY);
       tileXMultiplier++;
-    } else {
+    } else if(renderVertically) {
       startY += tiles[i]->mBox.h;
       tileXMultiplier = 0;
     }

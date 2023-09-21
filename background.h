@@ -15,6 +15,8 @@ public:
   void renderTiles(int startX, int startY, int num);
   LTexture gTexture;
   Background* tiles[NUM_TILES];
+  SDL_Rect backgroundColor;
+  bool renderVertically = 1;
 private:
   int backgroundTicks = 0;
 };
@@ -23,4 +25,4 @@ LTexture gBackground; LTexture gBackgroundSup;
 LTexture gFloor; LTexture gFloorSup;
 LTexture gLevel1Background, gForestBackground;
 LTexture gLevel1Floor, gForestFloor;
-LTexture gDesertTile, gDesertTile1, gDesertTower;
+LTexture gDesertTile, gDesertTile1, gDesertTower, gBackgroundMoon;

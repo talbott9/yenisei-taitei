@@ -18,6 +18,7 @@ SDL_Color White = {255, 255, 255};
 SDL_Color Grey = {100, 100, 155};
 SDL_Color Blue1 = {0, 105, 255};
 SDL_Color Black = {0, 0, 0};
+SDL_Color Yellow = {255, 200, 0};
 
 Mix_Music* gKozato = NULL;
 Mix_Music* gGimn = NULL;

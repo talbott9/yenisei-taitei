@@ -80,7 +80,7 @@ void Enemy::takeDamage() {
 		mCurrentHitPoints -= 2;
 }
 
-void Enemy::moveToXY(double x, double y, double speed) {
+void Enemy::moveToXY(double x, double y, double speed, bool drag) {
 	if(changeMove) {
 		changeMove = 0;
 		moved = 0;
@@ -105,26 +105,38 @@ void Enemy::moveToXY(double x, double y, double speed) {
 			sinAngle = -sinAngle;
 			dy = -speed*sinAngle;	
 		}
+		reachedTarget = 0;
 		moved = 1;
 	}
 	double distanceX = posX - x;
 	double distanceY = y - posY;
-	if(abs(distanceX) > 5 || abs(distanceY) > 5) {
-		double speedMod = sqrt(distanceX*distanceX + distanceY*distanceY)/distance;
-		if(speedMod > 1)
-			speedMod = 0.1;
-		dx *= speedMod;	
-		dy *= speedMod;
-		posX += dx; posY += dy;
-		mBox.x = posX; mBox.y = posY;
-		if(speedMod != 0) {
-		  dx /= speedMod;
-		  dy /= speedMod;
-		}
-		//printf("%g/%g/%g/%g/%g/%g/%g/%g\n", distanceX, distanceY, distance, speedMod, dx, dy, x, y);
+	if(drag) {
+	  if(abs(distanceX) > 5 || abs(distanceY) > 5) {
+	    double speedMod = sqrt(distanceX*distanceX + distanceY*distanceY)/distance;
+	    if(speedMod > 1)
+	      speedMod = 0.1;
+	    dx *= speedMod;	
+	    dy *= speedMod;
+	    posX += dx; posY += dy;
+	    mBox.x = posX; mBox.y = posY;
+	    if(speedMod != 0) {
+	      dx /= speedMod;
+	      dy /= speedMod;
+	    }
+	    //printf("%g/%g/%g/%g/%g/%g/%g/%g\n", distanceX, distanceY, distance, speedMod, dx, dy, x, y);
+	  } else {
+	    posX = x; posY = y;
+	    dx = 0; dy = 0;
+	  }
 	} else {
-		posX = x; posY = y;
-		dx = 0; dy = 0;
+	  if(abs(distanceX) > 5 || abs(distanceY) > 5) {
+	    posX += dx; posY += dy;
+	    mBox.x = posX; mBox.y = posY;
+	  } else {
+	    posX = x; posY = y;
+	    dx = 0; dy = 0;
+	    reachedTarget = 1;
+	  }
 	}
 }
 
@@ -154,12 +166,15 @@ void Enemy::renewComp(int num) {
 }
 
 void Enemy::showTime() {
-  int time = actionTicks/60;
+  int time = timeTicks/60;
   gTime.loadFromRenderedText(std::to_string(time), White, 0, gBattleFontSmall);
+  gStoredTime.loadFromRenderedText(std::to_string(storedTime), Yellow, 0, gBattleFontSmall);
   if(time >= 10)
     gTime.render(camera.w - 30, camera.y + 5);
   else
     gTime.render(camera.w - 20, camera.y + 5);
+  if(storedTime >= 10)
+    gStoredTime.render(camera.w - 70, camera.y + 5);
+  else
+    gStoredTime.render(camera.w - 60, camera.y + 5);
 }
-
-

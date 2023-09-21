@@ -13,13 +13,12 @@ public:
   void restoreHP();
   void takeDamage();
   //int attack(BattleChara* battleLouis);
-  void moveToXY(double x, double y, double speed);
+  void moveToXY(double x, double y, double speed, bool drag = true);
   void doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Projectile* projectile4, Chara* hildegarde, Chara* yenisei);
   void reset();
   bool moved; bool changeMove;
-  int reachedTarget;
   double distanceX, distanceY, distance;
-  int actionTicks; bool enemyDead;
+  int actionTicks, timeTicks; bool enemyDead;
   int randX, randY;
   int shotType;
   int pattern, lastPattern;
@@ -44,14 +43,19 @@ public:
   void setClips(int w, int h);
   bool ready;
   bool clear = 1;
-  int deaths;
+  int deaths = 2;
   SDL_RendererFlip flipType = SDL_FLIP_NONE;
   void freezeAnim();
   SDL_Rect freezeBox;
   int spriteWidth, spriteHeight;
   bool attackAnim;
   void showTime();
-  LTexture gTime;
+  LTexture gTime, gStoredTime;
+  int storedTime;
+  bool shoot = 1;
+  bool switchMove, reachedTarget;
+  bool moveDrag = 1;
+  double moveSpeed = 15.0;
 public:
   void set(LTexture* texture, enemyIDEnum id, int w, int h, int numClips) {
     this->gEnemyTexture = texture;
