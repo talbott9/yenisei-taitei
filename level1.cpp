@@ -30,9 +30,17 @@ bool loadMedia() {
 	if(!gForestFloor.loadFromFile("resources/floor_tiles/forestfloor.png"))
 		success = false;
 	if(!gLevel1Background.loadFromFile("resources/floor_tiles/level1background.png"))
-		success = false;
+	  success = false;
 	if(!gForestBackground.loadFromFile("resources/floor_tiles/forestbackground.png"))
-		success = false;
+	  success = false;
+	if(!gIceBackground.loadFromFile("resources/floor_tiles/icebackground.png"))
+	  success = false;
+	if(!gIceTile.loadFromFile("resources/floor_tiles/icetile.png"))
+	  success = false;
+	if(!gIceTile1.loadFromFile("resources/floor_tiles/icetile1.png"))
+	  success = false;
+	if(!gIceTile2.loadFromFile("resources/floor_tiles/icetile2.png"))
+	  success = false;
 	if(!gDesertTile.loadFromFile("resources/floor_tiles/deserttile.png"))
 		success = false;
 	if(!gDesertTile1.loadFromFile("resources/floor_tiles/deserttile1.png"))
@@ -976,7 +984,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
     }
     
     switch(deaths) {
-    case 0:
+    case 0: //Tujo 1
       if(!enemyDead) {
 	mMaxHitPoints = 100;
 	moveThreshold = 220;
@@ -992,10 +1000,10 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 
 	double angleProj = actionTicks*10;
 	if(actionTicks > 60) 
-	  projectile4->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, enemyID, 10, angleProj, angleProj, 7, 7.0, false, false);	if(actionTicks > 60) {
-	} else {
+	  projectile4->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, enemyID, 10, angleProj, angleProj, 7, 7.0, false, false);
+	else 
 	  restoreHP();
-	}
+	
 	
 	  
 	if(clearBullets) {
@@ -1013,7 +1021,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	}
       }
       break;
-    case 1:
+    case 2: //Tujo 2
       if(!enemyDead) {
 	mMaxHitPoints = 100;
 	moveThreshold = 220;
@@ -1050,7 +1058,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	}
       }
       break;
-    case 2:
+    case 1: //Tujo 3 (lance)
       if(!enemyDead) {
 	mMaxHitPoints = 200;
 	moveThreshold = 120;
@@ -1078,10 +1086,106 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 
 	projectile4->projectileTicks = 2;
 	projectile4->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, enemyID, 999999999, 30.0, 0.0, 50, 0.75, false, true, 1.0, shoot && reachedTarget);
+
+	if(!(timeTicks > moveThreshold))
+	  restoreHP();
 	
 	if(shoot && reachedTarget) {
 	  shoot = 0;
 	  actionTicks = 1;
+	}
+	
+	//projectile4->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, troubadourID, 99999999, 30.0, 0.0, 30, 10.0, false, true);
+	
+	  
+	if(clearBullets) {
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+
+
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	}
+      }
+      break;
+    case 4: //Oubliette
+      if(!enemyDead) {
+	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, SCREEN_HEIGHT/2, 6.0);
+	if(timeTicks > 120) {
+	  projectile4->shootEnemy3(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID);
+	  projectile4->checkDie(hildegarde);
+	}
+	if(timeTicks > 30) {
+	  if(actionTicks*100 > SCREEN_WIDTH) 
+	    actionTicks = 1;
+	  projectile3->shootEnemy0(actionTicks*100, 0, hildegarde, enemyID, 1, 90.0, 90.0, 1, 10.0);
+	} else {
+	  actionTicks = 1;
+	}
+	if(timeTicks > 150)
+	  projectile2->shootEnemy0(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, enemyID, 90, 90.0, 90.0, 1, 3.0, false, true);
+	else
+	  restoreHP();
+	
+      } else {
+	dx = 0; dy = 0;
+	renderAngle += 30.0;
+	if(renderAngle >= 720) {
+	  reset();
+	  projectile4->destroyProjs(NUM_PROJECTILES);
+	  projectile3->destroyProjs(NUM_PROJECTILES);
+	  projectile2->destroyProjs(NUM_PROJECTILES);
+	}
+      } 
+      break;
+    case 3: //Lance 2
+      if(!enemyDead) {
+	mMaxHitPoints = 200;
+	moveThreshold = 120;
+	if(actionTicks == moveThreshold) {
+	  reachedTarget = 0;
+	  moveDrag = 0;
+	  moveSpeed = 10.0;
+	  shoot = 1;
+	  attackAnim = 0;
+	  changeMove = 1;
+	  if(!switchMove) {
+	    randY = hildegarde->getY();
+	    randX = hildegarde->getX() - mBox.w/2;
+	    moveSpeed = 20.0;
+	    switchMove = 1;
+	  } else {
+	    randX = SCREEN_WIDTH/2 - mBox.w/2;
+	    randY = camera.y - 200;
+	    moveSpeed = 10.0;
+	    switchMove = 0;
+	  }
+	  if(randX > SCREEN_WIDTH - mBox.w)
+	    randX = SCREEN_WIDTH - mBox.w;
+	}
+
+        moveToXY(randX, randY, moveSpeed, moveDrag);
+
+	projectile4->projectileTicks = 2;
+	projectile4->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, enemyID, 999999999, 30.0, 0.0, 50, 0.75, false, true, 1.0, shoot && reachedTarget);
+	//projectile4->shootEnemy1(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, enemyID, 99999999, 360.0, 30, 1.0, false, shoot && reachedTarget);
+	
+	if(shoot && reachedTarget) {
+	  if(switchMove)
+	    screenShake = 1;
+	  shoot = 0;
+	  actionTicks = 1;
+	}
+
+	if(screenShake) {
+	  if(actionTicks >= 30) {
+	    screenShake = 0;
+	  }
 	}
 	
 	//projectile4->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, troubadourID, 99999999, 30.0, 0.0, 30, 10.0, false, true);

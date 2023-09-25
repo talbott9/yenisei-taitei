@@ -9,7 +9,7 @@ public:
   void shootHG(double x, double y, Enemy* enemy);
   void shootEnemy5(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle = 360.0, double startingAngle = 0.0, int batch = 10, double spd = 5.0, bool rotate = false);
   void shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle = 360.0, double startingAngle = 0.0, int batch = 10, double spd = 5.0, bool rotate = false, bool angleTarget = false, double slow = 1, bool shootBool = 0);
-  void shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number = 0, double sectionAngle = 0.0, int batch = 0, double spd = 0.0, bool rotate = false);
+  void shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number = 0, double sectionAngle = 0.0, int batch = 0, double spd = 0.0, bool rotate = false, bool shootBool = 0);
   void shootEnemy2(double x, double y, Chara* hildegarde, enemyIDEnum enemyID);
   void shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, double velX = 0.0, double spd = 5.0, double gravityForce = 0.1, bool rotate = false, int number = 10);
   void shootEnemy4(double x, double y, Chara* hildegarde, enemyIDEnum enemyID);

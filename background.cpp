@@ -1,7 +1,7 @@
 #include "background.h"
 
 Background background;
-Background desertTile, desertTile1, desertTower, backgroundMoon;
+Background desertTile, desertTile1, desertTower, backgroundMoon, iceTile, iceTile1, iceTile2;
 
 
 Background::Background() {
@@ -20,6 +20,14 @@ Background::Background() {
 	desertTower.gTexture = gDesertTower;
 	desertTower.renderVertically = 0;
 
+	iceTile.mBox = {0, 0, 30, 32};
+	iceTile.gTexture = gIceTile;
+	iceTile1.mBox = iceTile.mBox;
+	iceTile1.gTexture = gIceTile1;
+	iceTile1.renderVertically = 0;
+	iceTile2.mBox = iceTile.mBox;
+	iceTile2.gTexture = gIceTile2;
+
 	backgroundColor = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
 }
 
@@ -35,16 +43,44 @@ void Background::addXY(int x, int y) {
 void Background::render(SDL_Rect& camera, int levelID) {
 	backgroundTicks++;
 		  
-	int intvFloor = 1/slowValue;
-	int intvBackground = 25/slowValue;
+	intvFloor = 1/slowValue;
+	intvBackground = 25/slowValue;
 
 	switch(levelID) {
+	case 2:
+	  SDL_SetRenderDrawColor(gRenderer, 0, 0, 50, 255);
+	  SDL_RenderFillRect(gRenderer, &backgroundColor);
+	  
+	  gBackground = gIceBackground;
+	  gBackgroundSup = gIceBackground;
+	  renderBackground();
+
+	  iceTile.renderTiles(iceTile.mBox.x - camera.x, camera.y + 535, NUM_TILES);
+	  if(backgroundTicks % 1 == 0)
+	    iceTile.mBox.x -= 5/intvFloor;
+	  if(iceTile.mBox.x <= -iceTile.mBox.w)
+	    iceTile.mBox.x = 0;
+	  
+	  iceTile1.renderTiles(iceTile1.mBox.x - camera.x, camera.y + 503, 30);
+	  if(backgroundTicks % 1 == 0)
+	    iceTile1.mBox.x -= 5/intvFloor;
+	  if(iceTile1.mBox.x <= -iceTile1.mBox.w)
+	    iceTile1.mBox.x = 0;
+
+	  iceTile2.renderTiles(iceTile2.mBox.x - camera.x, camera.h - 50, 60);
+	  if(backgroundTicks % 1 == 0)
+	    iceTile2.mBox.x -= 5/intvFloor;
+	  if(iceTile2.mBox.x <= -iceTile2.mBox.w)
+	    iceTile2.mBox.x = 0;
+	  
+	  break;
 	case 3:
 	  gFloor = gForestFloor;
 	  gFloorSup = gForestFloor;	
 	  gBackground = gForestBackground;	
 	  gBackgroundSup = gForestBackground;
 	  floor.h = 300;
+	  renderBackground();
 	  break;
 	case 4:
 	  SDL_SetRenderDrawColor(gRenderer, 0, 0, 50, 255);
@@ -77,25 +113,9 @@ void Background::render(SDL_Rect& camera, int levelID) {
 	  gFloorSup = gLevel1Floor;	
 	  gBackground = gLevel1Background;	
 	  gBackgroundSup = gLevel1Background;
+	  renderBackground();
 	  break;
 	}
-
-	floor.y =  SCREEN_HEIGHT - floor.h;
-
-	gBackground.render(background.x, background.y);
-	gBackgroundSup.render(background.x + background.w, background.y);
-	gFloor.render(floor.x - camera.x, floor.y - camera.y);
-	gFloorSup.render(floor.x + floor.w - camera.x, floor.y - camera.y);
-	if(backgroundTicks % 1 == 0)
-		floor.x -= 5/intvFloor;
-	if(backgroundTicks % intvBackground == 0) {
-		background.x -= 5;
-		backgroundTicks = 0;
-	}
-	if(background.x <= -background.w)
-		background.x = 0;
-	if(floor.x <= -floor.w)
-		floor.x = 0;
 }
 
 
@@ -125,4 +145,24 @@ void Background::renderTiles(int startX, int startY, int num) {
     //printf("%b, %i, %i\n", checkCollision(camera, tiles[i]->mBox), camera.w);
   }
   tileXMultiplier = 0;
+}
+
+void Background::renderBackground() {
+  floor.y =  SCREEN_HEIGHT - floor.h;
+
+  gBackground.render(background.x, background.y);
+  gBackgroundSup.render(background.x + background.w, background.y);
+  gFloor.render(floor.x - camera.x, floor.y - camera.y);
+  gFloorSup.render(floor.x + floor.w - camera.x, floor.y - camera.y);
+
+  if(backgroundTicks % 1 == 0)
+    floor.x -= 5/intvFloor;
+  if(backgroundTicks % intvBackground == 0) {
+    background.x -= 5;
+    backgroundTicks = 0;
+  }
+  if(background.x <= -background.w)
+    background.x = 0;
+  if(floor.x <= -floor.w)
+    floor.x = 0;
 }

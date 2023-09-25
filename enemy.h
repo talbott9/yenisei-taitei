@@ -43,7 +43,7 @@ public:
   void setClips(int w, int h);
   bool ready;
   bool clear = 1;
-  int deaths = 2;
+  int deaths;
   SDL_RendererFlip flipType = SDL_FLIP_NONE;
   void freezeAnim();
   SDL_Rect freezeBox;

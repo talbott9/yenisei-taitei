@@ -111,7 +111,7 @@ void Enemy::moveToXY(double x, double y, double speed, bool drag) {
 	double distanceX = posX - x;
 	double distanceY = y - posY;
 	if(drag) {
-	  if(abs(distanceX) > 5 || abs(distanceY) > 5) {
+	  if(abs(distanceX) > abs(dx) || abs(distanceY) > abs(dy)) {
 	    double speedMod = sqrt(distanceX*distanceX + distanceY*distanceY)/distance;
 	    if(speedMod > 1)
 	      speedMod = 0.1;
@@ -129,7 +129,7 @@ void Enemy::moveToXY(double x, double y, double speed, bool drag) {
 	    dx = 0; dy = 0;
 	  }
 	} else {
-	  if(abs(distanceX) > 5 || abs(distanceY) > 5) {
+	  if(abs(distanceX) > abs(dx) || abs(distanceY) > abs(dy)) {
 	    posX += dx; posY += dy;
 	    mBox.x = posX; mBox.y = posY;
 	  } else {

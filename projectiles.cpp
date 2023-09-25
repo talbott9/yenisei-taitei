@@ -20,7 +20,7 @@ Projectile::Projectile() {
   saucerProjectile.setVariables(10, 23, 9.0, 2, &gSaucerBullet, 0, 23, 23);
   starProjectile1.setVariables(7, 7, 6.0, 10, &gStarBullet1, 0, 25, 25);
   snowflakeProjectile.setVariables(8, 8, 6.0, 10, &gSnowflakeBullet, 0, 15, 15);
-  shardProjectile.setVariables(7, 7, 6.0, 10, &gShardBullet, 0, 25, 25);
+  shardProjectile.setVariables(7, 7, 6.0, 10, &gShardBullet, 0, 25, 25, false);
   soundProjectile.setVariables(15, 15, 6.0, 10, &gSoundBullet, 0, 25, 25);
   daggerProjectile.setVariables(5, 5, 6.0, 10, &gDaggerBullet, 0, 25, 25, true);
 }
@@ -667,11 +667,11 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
     //difficulty = 2; // delete
     actualIntv = number;
     if(difficulty == 0)
-      actualIntv = number;
+      actualIntv = number*2;
     else if(difficulty == 1)
-      actualIntv = number/1.5;
+      actualIntv = number*1.5;
     else if(difficulty == 2)
-      actualIntv = number/2;
+      actualIntv = number;
 
     if(projectileTicks % actualIntv == 0 || shootBool) {
       for(int i = 0; i < batch; i++) {
@@ -754,7 +754,8 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
         projs[i]->checkDiePlus(hildegarde);
 	SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
 	SDL_RenderFillRect(gRenderer, &projs[i]->mBox);
-	SDL_RenderFillRect(gRenderer, &projs[i]->mBox1);
+	if(projs[i]->projectileIsLong)
+	  SDL_RenderFillRect(gRenderer, &projs[i]->mBox1);
       }
     }
     projectileTicks++;
@@ -762,7 +763,7 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
   }
 }
 
-void Projectile::shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, int batch, double spd, bool rotate) {
+void Projectile::shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, int batch, double spd, bool rotate, bool shootBool) {
   defaultPosX = x; defaultPosY = y;
 
   if(clearBullets)
@@ -1033,6 +1034,76 @@ void Projectile::shootEnemy1(double x, double y, Chara* hildegarde, enemyIDEnum 
       //SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
       //SDL_Rect box = projs[i]->mBox;
       //SDL_RenderFillRect(gRenderer, &box);
+    }
+    projectileTicks++;
+    break;
+  case bohemondID:
+    actualIntv = number;
+    //difficulty = 2;
+    
+    if(difficulty == 0)
+      actualIntv = number*1.5;
+    else if(difficulty == 1)
+      actualIntv = number*1.25;
+    else if(difficulty == 2)
+      actualIntv = number;
+
+    if(projectileTicks / actualIntv >= NUM_PROJECTILES)
+      projectileTicks = 0;
+
+    if(projectileTicks % actualIntv == 0 || shootBool) {
+      for(int i = 0; i < batch; i++) {
+	//printf("enemyshot %i\n", projectilesShot);
+	projs[projectilesShot]->posX = defaultPosX;
+	projs[projectilesShot]->posY = defaultPosY;
+	projs[projectilesShot]->defaultPosX = defaultPosX;
+	projs[projectilesShot]->defaultPosY = defaultPosY;
+	projs[projectilesShot]->mBox.w = mBox.w;
+	projs[projectilesShot]->mBox.h = mBox.h;
+	projs[projectilesShot]->mBox.x = projs[projectilesShot]->posX;
+	projs[projectilesShot]->mBox.y = projs[projectilesShot]->posY;
+	projs[projectilesShot]->targetX = rand()%(projs[projectilesShot]->mBox.x*2) - projs[projectilesShot]->mBox.x;
+	projs[projectilesShot]->targetY = rand()%(SCREEN_HEIGHT/2);
+	projs[projectilesShot]->speed = 5.0+(i/5.0)*spd;
+	projs[projectilesShot]->moveGravityBullet = 1;	
+
+	projectilesShot++;
+	if(projectilesShot >= NUM_PROJECTILES)
+	  projectilesShot = 0;
+      }
+    }
+
+    for(int i = 0; i < NUM_PROJECTILES; i++) {
+      if(checkCollision(projs[i]->mBox, camera)) {
+	if(projs[i]->moveGravityBullet) 
+	  projs[i]->moveGravity(projs[i]->targetX, projs[i]->targetY, 0.1);
+	projs[i]->posX += projs[i]->dx;
+	projs[i]->posY += projs[i]->dy;
+	projs[i]->mBox.x = projs[i]->posX;
+	projs[i]->mBox.y = projs[i]->posY;
+	projs[i]->angle = projs[i]->getAngle(projs[i]->posX + projs[i]->dx, projs[i]->posY + projs[i]->dy);
+	//projs[i]->gravityTicks++;
+	
+	if(rotate) {
+	  projs[i]->angle += 5.0;
+	  if(projs[i]->angle == 360)
+	    projs[i]->angle = 0.0;
+	}
+
+	if(projectileIsLong) {
+	  projs[i]->setLongProjBox();
+	}
+	
+      } else {
+	renewProj(i);
+      }
+      if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
+        gTexture->render(projs[i]->mBox.x - spriteWidth/2 + 2 - camera.x, projs[i]->mBox.y - spriteHeight/2 - camera.y, NULL, projs[i]->angle);
+        projs[i]->checkDiePlus(hildegarde);
+	SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
+	SDL_RenderFillRect(gRenderer, &projs[i]->mBox);
+	SDL_RenderFillRect(gRenderer, &projs[i]->mBox1);
+      }
     }
     projectileTicks++;
     break;
@@ -1320,6 +1391,51 @@ void Projectile::shootEnemy3(double x, double y, Chara* hildegarde, enemyIDEnum 
     //SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
     //	for(int i = 0; i < NUM_PROJECTILES; i++)
     //	SDL_RenderFillRect(gRenderer, &showBox[i]);
+    break;
+  case bohemondID:
+    actualIntv = 3;
+    if(projectileTicks / actualIntv >= NUM_PROJECTILES)
+      projectileTicks = 0;
+    //printf("%i/%i/%g/%g/%b\n", projectileTicks/actualIntv, projectileTicks%actualIntv, projs[projectileTicks/actualIntv]->dx, projs[projectileTicks/actualIntv]->dy, projs[projectileTicks/actualIntv]->shotBullet);
+    gravityTicks++;
+
+    if(projectileTicks % actualIntv == 0 && (projs[projectileTicks/actualIntv]->dx == 0.0 && projs[projectileTicks/actualIntv]->dy == 0.0)) {
+      projs[projectileTicks/actualIntv]->posX = defaultPosX; projs[projectileTicks/actualIntv]->posY = defaultPosY;
+      projs[projectileTicks/actualIntv]->defaultPosX = defaultPosX; projs[projectileTicks/actualIntv]->defaultPosY = defaultPosY;
+      projs[projectileTicks/actualIntv]->mBox.x = posX; projs[projectileTicks/actualIntv]->mBox.y = posY;
+      projs[projectileTicks/actualIntv]->targetX = rand()%SCREEN_WIDTH; projs[projectileTicks/actualIntv]->targetY = rand()%(SCREEN_HEIGHT/4);
+      projs[projectileTicks/actualIntv]->speed = spd*1.1;
+      projs[projectileTicks/actualIntv]->mBox.w = mBox.w;
+      projs[projectileTicks/actualIntv]->mBox.h = mBox.h;
+      //projs[projectileTicks/actualIntv]->moveToXY(projs[projectileTicks/actualIntv]->targetX, projs[projectileTicks/actualIntv]->targetY);
+      //printf("%i/%i\n", projs[projectileTicks/actualIntv]->targetX, projs[projectileTicks/actualIntv]->targetY);
+      projs[projectileTicks/actualIntv]->moveGravityBullet = 1;
+    }
+    for(int i = 0; i < NUM_PROJECTILES; i++) {
+      if(checkCollision(projs[i]->mBox, camera)) {
+	if(projs[i]->moveGravityBullet)
+	  projs[i]->moveGravity(projs[i]->targetX, projs[i]->targetY, 0.1);
+	projs[i]->posX += projs[i]->dx;
+	projs[i]->posY += projs[i]->dy;
+	projs[i]->mBox.x = projs[i]->posX;
+	projs[i]->mBox.y = projs[i]->posY;
+	projs[i]->angle = projs[i]->getAngle(projs[i]->posX + projs[i]->dx, projs[i]->posY + projs[i]->dy);
+	
+	if(projectileIsLong)
+	  projs[i]->setLongProjBox();
+	
+      } else {
+	renewProj(i);
+      }
+      if(projs[i]->dx != 0.0 || projs[i]->dy != 0.0) {
+	gTexture->render(projs[i]->mBox.x - spriteWidth/2 + 2 - camera.x, projs[i]->mBox.y - spriteHeight/2 - camera.y, NULL, projs[i]->angle);
+	SDL_SetRenderDrawColor(gRenderer, 255, 50, 0, 255);
+	SDL_RenderFillRect(gRenderer, &projs[i]->mBox);
+	SDL_RenderFillRect(gRenderer, &projs[i]->mBox1);
+      } 
+      //printf("%i/%i/%b/%i/%i/%i/%i\n", projs[i]->targetX, projs[i]->targetY);
+    }
+    projectileTicks++;
     break;
   }
 }

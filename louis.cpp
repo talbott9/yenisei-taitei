@@ -29,12 +29,12 @@ void Chara::handleEvent( SDL_Event& e ) {
       case SDLK_DOWN: rotateUp = 1; break;
       case SDLK_LEFT:
 	moveLeft = true;
-	if(!slowDown)
+	if(!slowDown && !hildegarde.death)
 	  resetAnim = 1;
 	break;
       case SDLK_RIGHT:
 	moveRight = true;
-	if(!slowDown)
+	if(!slowDown && !hildegarde.death)
 	  resetAnim = 1;
 	break;
       case SDLK_z: if(attackDirection != 0)
