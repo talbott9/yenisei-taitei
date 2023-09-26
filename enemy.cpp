@@ -1,7 +1,7 @@
 #include "enemy.h"
 
 
-Enemy enemy1, saucer, hyacinthe, troubadour, bohemond;
+Enemy enemy1, saucer, hyacinthe, troubadour, bohemond, ghost1;
 
 
 
@@ -27,6 +27,8 @@ Enemy::Enemy() {
 	hyacinthe.setClips(hyacinthe.mBox.w, hyacinthe.mBox.h);
 	troubadour.setClips(troubadour.mBox.w, troubadour.mBox.h);
 	bohemond.setClips(bohemond.mBox.w, bohemond.mBox.h);
+
+	ghost1.set(&gGhost1Texture, ghost1ID, 51, 51, 1);
 }
 
 void Enemy::setClips(int w, int h) {
@@ -38,7 +40,7 @@ void Enemy::setClips(int w, int h) {
   }
 }
 
-void Enemy::setComp(SDL_Rect box, double x, double y, enemyIDEnum id) {
+void Enemy::setComp(SDL_Rect box, double x, double y, enemyIDEnum id, LTexture* gTexture) {
   posX = x;
   posY = y;
   mBox.x = posX;
@@ -48,6 +50,7 @@ void Enemy::setComp(SDL_Rect box, double x, double y, enemyIDEnum id) {
   defaultPosX = posX;
   defaultPosY = posY;
   enemyID = id;
+  gEnemyTexture = gTexture;
 }
 
 SDL_Rect Enemy::getBox() {
@@ -140,14 +143,21 @@ void Enemy::moveToXY(double x, double y, double speed, bool drag) {
 	}
 }
 
-void Enemy::createComps(int num) { //companions
+void Enemy::createComps(int num, double x, double y) { //companions
   if(!createdComps) {
     for(int i = 0; i < num; i++) {
       companions[i] = new Enemy();
-      companions[i]->enemyID = enemyID;
+      companions[i]->setComp(mBox, x, y, enemyID, gEnemyTexture);
     }
     //printf("created bullets #%i, %i, %i\n", num, mBox.w, mBox.h);
     createdComps = 1;
+  }
+}
+
+void Enemy::createSingleComp(int num, double x, double y) {
+  if(!createdComps) {
+    companions[num] = new Enemy();
+    companions[num]->setComp(mBox, x, y, enemyID, gEnemyTexture);
   }
 }
 
@@ -163,6 +173,7 @@ void Enemy::destroyComps(int num) {
 void Enemy::renewComp(int num) {
   delete companions[num];
   companions[num] = new Enemy();
+  companions[num]->setComp(mBox, posX, posY, enemyID, gEnemyTexture);
 }
 
 void Enemy::showTime() {

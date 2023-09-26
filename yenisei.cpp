@@ -234,8 +234,12 @@ void play(int levelID) {
 
 	  yenisei.render(camera, &gYeniseiTexture);
 	  hildegarde.renderHG(camera, &gHildegardeTexture);
-	  if(!gameOverScreenSuccess) 
-	    enemy.doThings(&proj1, &proj2, &proj3, &proj4, &hildegarde, &yenisei);
+	  if(!gameOverScreenSuccess) {
+	    if(isBoss)
+	      enemy.doThings(&proj1, &proj2, &proj3, &proj4, &hildegarde, &yenisei);
+	    else
+	      zakoDoThings(&hildegarde);
+	  }
 	  
 	  if(isGameOverScreen)
 	    gameOverScreen();	
@@ -314,7 +318,7 @@ int main( int argc, char* args[] )
       printf( "Failed to load media!\n" );
     }
     else {
-      play(4);
+      play(levelID);
     }
   }
 

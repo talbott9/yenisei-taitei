@@ -1,9 +1,9 @@
 #define ENEMY_FRAMES 10
-#define NUM_COMPS 5 //companions
+#define NUM_COMPS 50 //companions
 
 class Projectile; class Chara;
 
-enum enemyIDEnum {conradID, saucerID, hyacintheID, troubadourID, bohemondID};
+enum enemyIDEnum {conradID, saucerID, hyacintheID, troubadourID, bohemondID, ghost1ID = 11};
 
 class Enemy {
 public:
@@ -15,6 +15,7 @@ public:
   //int attack(BattleChara* battleLouis);
   void moveToXY(double x, double y, double speed, bool drag = true);
   void doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Projectile* projectile4, Chara* hildegarde, Chara* yenisei);
+  //void zakoDoThings(Chara* hildegarde);
   void reset();
   bool moved; bool changeMove;
   double distanceX, distanceY, distance;
@@ -31,12 +32,13 @@ public:
   int moveThreshold;
   LTexture* gEnemyTexture;
   enemyIDEnum enemyID;
-  void createComps(int num);
+  void createComps(int num, double x, double y);
+  void createSingleComp(int num, double x, double y);
   void destroyComps(int num);
   void renewComp(int num);
   bool createdComps, clearComps;
   int numberOfComps;
-  void setComp(SDL_Rect box, double x, double y, enemyIDEnum id);
+  void setComp(SDL_Rect box, double x, double y, enemyIDEnum id, LTexture* gTexture);
   SDL_Rect gEnemyClips[ENEMY_FRAMES];
   int numberOfClips;
   SDL_Rect* currentClip = &gEnemyClips[0];
@@ -70,6 +72,7 @@ private:
   int mMaxHitPoints;
   double dx, dy;
   double posX, posY;
+public:
   Enemy* companions[NUM_COMPS];
 };
 

@@ -77,4 +77,5 @@ LTexture gYeniseiTexture;
 LTexture gHildegardeTexture;
 LTexture gHGArrow1Texture;
 LTexture gEnemy1Texture, gSaucerTexture, gHyacintheTexture, gTroubadourTexture, gBohemondTexture;
+LTexture gGhost1Texture;
 LTexture gBullet1, gBullet2, gSaucerBullet, gStarBullet1, gSnowflakeBullet, gShardBullet, gSoundBullet, gDaggerBullet;

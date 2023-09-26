@@ -10,12 +10,17 @@
 const int LEVEL_WIDTH = 1290;
 const int LEVEL_HEIGHT = 960;
 
+int levelID;
+bool isBoss;
+
 void clearAllProjectiles(bool clearPlayerProjectiles = false);
 
 bool loadMedia() {
 	bool success = true;
 
-	if(!gEnemy1Texture.loadFromFile("resources/enemies/enemy1.png"))
+	if(!gGhost1Texture.loadFromFile("resources/enemies/ghost1.png"))
+	  success = false;
+      	if(!gEnemy1Texture.loadFromFile("resources/enemies/enemy1.png"))
 		success = false;
 	if(!gSaucerTexture.loadFromFile("resources/enemies/saucer.png"))
 		success = false;
@@ -406,7 +411,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
       else if(!enemyDead) {
 	if(clearComps)
 	  destroyComps(numberOfComps);
-	createComps(numberOfComps);
+	createComps(numberOfComps, posX, posY);
 	
 	moveToXY(SCREEN_WIDTH/2 - mBox.w/2, 10, 8.0);
 
@@ -1207,6 +1212,32 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
       }
       break;
     }
+  }
+}
+
+void zakoDoThings(Chara* hildegarde) {
+  switch(levelID) {
+  case 0:
+    //ghost1.createComps(5);
+     for(int i = 0; i < 5; i++) {
+       ghost1.createSingleComp(i, camera.x + i*100, camera.y +i*10);
+       if(!ghost1.companions[i]->switchMove) {
+	 ghost1.companions[i]->moveToXY(camera.w - ghost1.companions[i]->getBox().w, 0, 5.0, false);
+	 if(ghost1.companions[i]->reachedTarget) {
+	   ghost1.companions[i]->changeMove = 1;
+	   ghost1.companions[i]->switchMove = 1;
+	 }
+       } else {
+	 ghost1.companions[i]->moveToXY(camera.x, 0, 5.0, false);
+	 if(ghost1.companions[i]->reachedTarget) {
+	   ghost1.companions[i]->changeMove = 1;
+	   ghost1.companions[i]->switchMove = 0;
+	 }
+       }
+      ghost1.companions[i]->gEnemyTexture->render(ghost1.companions[i]->getBox().x, ghost1.companions[i]->getBox().y);
+     }
+     ghost1.createdComps = 1;
+    break;
   }
 }
 
