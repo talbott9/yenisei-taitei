@@ -36,6 +36,12 @@ bool loadMedia() {
 		success = false;
 	if(!gLevel1Background.loadFromFile("resources/floor_tiles/level1background.png"))
 	  success = false;
+	if(!gMountainBack.loadFromFile("resources/floor_tiles/mountain_back.png"))
+	  success = false;
+	if(!gMountainFront.loadFromFile("resources/floor_tiles/mountain_front.png"))
+	  success = false;
+	if(!gMountainClouds.loadFromFile("resources/floor_tiles/mountain_clouds.png"))
+	  success = false;
 	if(!gForestBackground.loadFromFile("resources/floor_tiles/forestbackground.png"))
 	  success = false;
 	if(!gIceBackground.loadFromFile("resources/floor_tiles/icebackground.png"))
@@ -152,19 +158,16 @@ void Enemy::reset() {
   randX = SCREEN_WIDTH/2 - mBox.w/2;
   randY = 50;
   while(pattern == lastPattern)
-    pattern = rand()%4;
+  pattern = rand()%4;
   changeMove = 1; 
   renderAngle = 0;
   storedTime = timeTicks/60;
-  actualScore += 10000/actionTicks;
-  actionTicks = 0; timeTicks = 0;
-  /* if(actualScore == 3000)
-    difficulty++;
-  else if(actualScore == 6000)
-  difficulty++;*/
-  mMaxHitPoints = 100;
+  if(isBoss)
+    actualScore += 10000/actionTicks;
+  actionTicks = 1; timeTicks = 1;
   mCurrentHitPoints = mMaxHitPoints;
   clearAllProjectiles();
+  destroyComps(NUM_COMPS);
   createdComps = 0; ready = 0;
   clear = 1;
   currentClip = &gEnemyClips[0];
@@ -173,6 +176,8 @@ void Enemy::reset() {
   slowValue = 1.0; shoot = 0;
   switchMove = 0; reachedTarget = 0;
   moveDrag = 1; moveSpeed = 15.0;
+  dx = 0; dx = 0;
+  moveX = 0; moveY = 0;
 }
 
 void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Projectile* projectile4, Chara* hildegarde, Chara* yenisei) {
@@ -941,6 +946,7 @@ void Enemy::doThings(Projectile* projectile1, Projectile* projectile2, Projectil
 	if(actionTicks > 60)
 	  projectile4->shootEnemy0(mBox.x + mBox.w/2 - 5, mBox.y + mBox.h/2 - 5, hildegarde, enemyID, 10, angleProj+5, angleProj+5, 2, 2.5, true, false);
 
+	//Sometimes it won't shoot it. I don't know why it does it
 	if(actionTicks > 150)
 	  projectile1->shootEnemy1(mBox.x + mBox.w/2, mBox.y + mBox.h/2, hildegarde, saucerID, 160, 360.0, 10, 0.25);
 	else
@@ -1219,24 +1225,41 @@ void zakoDoThings(Chara* hildegarde) {
   switch(levelID) {
   case 0:
     //ghost1.createComps(5);
-     for(int i = 0; i < 5; i++) {
-       ghost1.createSingleComp(i, camera.x + i*100, camera.y +i*10);
-       if(!ghost1.companions[i]->switchMove) {
-	 ghost1.companions[i]->moveToXY(camera.w - ghost1.companions[i]->getBox().w, 0, 5.0, false);
-	 if(ghost1.companions[i]->reachedTarget) {
-	   ghost1.companions[i]->changeMove = 1;
-	   ghost1.companions[i]->switchMove = 1;
-	 }
-       } else {
-	 ghost1.companions[i]->moveToXY(camera.x, 0, 5.0, false);
-	 if(ghost1.companions[i]->reachedTarget) {
-	   ghost1.companions[i]->changeMove = 1;
-	   ghost1.companions[i]->switchMove = 0;
-	 }
-       }
-      ghost1.companions[i]->gEnemyTexture->render(ghost1.companions[i]->getBox().x, ghost1.companions[i]->getBox().y);
-     }
-     ghost1.createdComps = 1;
+    int numberOfComps = 5;
+    for(int i = 0; i < numberOfComps; i++) {
+      ghost1.createSingleComp(i, camera.x + i*100, camera.y +i*10);
+      if(!ghost1.deallocated[i]) {
+	ghost1.companions[i]->actionTicks++;
+	//printf("%i\n", ghost1.companions[i]->moveY);
+	if(!ghost1.companions[i]->switchMove) {
+	  ghost1.companions[i]->moveToXY(camera.w - ghost1.companions[i]->getBox().w, ghost1.companions[i]->moveY, 5.0, false);
+	  if(ghost1.companions[i]->reachedTarget) {
+	    ghost1.companions[i]->changeMove = 1;
+	    ghost1.companions[i]->switchMove = 1;
+	    ghost1.companions[i]->moveY = ghost1.companions[i]->actionTicks;
+	  }
+	} else {
+	  ghost1.companions[i]->moveToXY(camera.x, ghost1.companions[i]->moveY, 5.0, false);
+	  if(ghost1.companions[i]->reachedTarget) {
+	    ghost1.companions[i]->changeMove = 1;
+	    ghost1.companions[i]->switchMove = 0;
+	    ghost1.companions[i]->moveY = ghost1.companions[i]->actionTicks;
+	  }
+	}
+	
+	ghost1.companions[i]->takeDamageZako(&projectileHG);
+	if(ghost1.companions[i]->enemyDead)
+	  ghost1.deallocated[i] = true;
+	ghost1.companions[i]->gEnemyTexture->render(ghost1.companions[i]->getBox().x, ghost1.companions[i]->getBox().y);
+      }
+      projectile2Comp[i].setVariables(5, 5, 7.0, 30, &gBullet2, 0, 10, 10);
+      projectile2Comp[i].shootEnemy0(ghost1.companions[i]->getBox().x + ghost1.companions[i]->getBox().w/2, ghost1.companions[i]->getBox().y + ghost1.companions[i]->getBox().h/2, hildegarde, bohemondID, 90, 90.0, 90.0, 1, 3.0, false, true, 1, false, ghost1.deallocated[i]);
+
+      //if(clearBullets)
+      //projectile2Comp[i].destroyProjs(NUM_PROJECTILES);
+    }
+    
+    ghost1.createdComps = 1;
     break;
   }
 }
@@ -1255,5 +1278,19 @@ void Enemy::freezeAnim() {
     freezeBox.y = camera.h/2 - freezeBox.h/2;
     freezeBox.w += 64;
     freezeBox.x = camera.w/2 - freezeBox.h/2;
+  }
+}
+
+void Enemy::takeDamageZako(Projectile* projectile) {
+  for(int i = 0; i < NUM_PROJECTILES; i++) {
+    if(checkCollision(mBox, projectile->projs[i]->getBox()) && (projectile->projs[i]->dx != 0.0 || projectile->projs[i]->dy != 0.0)) {
+      if(mCurrentHitPoints - 10 <= 0) {
+	enemyDead = 1;
+	mCurrentHitPoints = mMaxHitPoints;
+      }
+      else
+	mCurrentHitPoints -= 10;
+      projectile->renewProj(i);
+    }
   }
 }

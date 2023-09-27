@@ -1,6 +1,7 @@
 #define ENEMY_FRAMES 10
 #define NUM_COMPS 50 //companions
 
+
 class Projectile; class Chara;
 
 enum enemyIDEnum {conradID, saucerID, hyacintheID, troubadourID, bohemondID, ghost1ID = 11};
@@ -12,6 +13,7 @@ public:
   int getCrrPoints();
   void restoreHP();
   void takeDamage();
+  void takeDamageZako(Projectile* projectile);
   //int attack(BattleChara* battleLouis);
   void moveToXY(double x, double y, double speed, bool drag = true);
   void doThings(Projectile* projectile1, Projectile* projectile2, Projectile* projectile3, Projectile* projectile4, Chara* hildegarde, Chara* yenisei);
@@ -20,7 +22,7 @@ public:
   bool moved; bool changeMove;
   double distanceX, distanceY, distance;
   int actionTicks, timeTicks; bool enemyDead;
-  int randX, randY;
+  int randX, randY, moveX, moveY;
   int shotType;
   int pattern, lastPattern;
   double renderAngle;
@@ -38,7 +40,7 @@ public:
   void renewComp(int num);
   bool createdComps, clearComps;
   int numberOfComps;
-  void setComp(SDL_Rect box, double x, double y, enemyIDEnum id, LTexture* gTexture);
+  void setComp(SDL_Rect box, double x, double y, enemyIDEnum id, LTexture* gTexture, int hitpoints);
   SDL_Rect gEnemyClips[ENEMY_FRAMES];
   int numberOfClips;
   SDL_Rect* currentClip = &gEnemyClips[0];
@@ -58,6 +60,8 @@ public:
   bool switchMove, reachedTarget;
   bool moveDrag = 1;
   double moveSpeed = 15.0;
+  bool deallocated[NUM_COMPS];
+  int shootingInterval;
 public:
   void set(LTexture* texture, enemyIDEnum id, int w, int h, int numClips) {
     this->gEnemyTexture = texture;

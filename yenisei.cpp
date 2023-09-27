@@ -115,24 +115,35 @@ void clearAllProjectiles(bool clearPlayerProjectiles) {
   proj4.clearProjectilesPlus();
   if(clearPlayerProjectiles)
     projectileHG.clearProjectilesPlus();
+  
+  for(int i = 0; i < NUM_COMPS; i++) {
+    projectile2Comp[i].destroyProjs(NUM_PROJECTILES);
+    projectile2Comp[i].clearProjectilesPlus();
+  }
 }
 
-void resetGame(Enemy* enemy, Chara* yenisei) {
+void resetGame(Enemy* enemy, Chara* yenisei, int levelID) {
   clearAllProjectiles(true);
-  enemy->setPosXY(enemy->defaultPosX, enemy->defaultPosY);
-  enemy->deaths = 0;
+  if(isBoss) {
+    enemy->setPosXY(enemy->defaultPosX, enemy->defaultPosY);
+    enemy->deaths = 0;
+    enemy->setVel(0,0);
+    enemy->restoreHP();
+    enemy->changeMove = 1; enemy->actionTicks = 0;
+  }
   yenisei->setPos(yenisei->defaultPosX, yenisei->defaultPosY);
   yenisei->setVel(0, 0);
-  enemy->setVel(0,0);
-  enemy->restoreHP();
-  enemy->changeMove = 1; enemy->actionTicks = 0;
   yenisei->accTicks = 0; yenisei->deathTicks = 0;
   yenisei->moved = 0; yenisei->didResetAnim = 0;
   yenisei->resetAnim = 0; HGAttacking = 0;
   actualScore = 0; score = 0;
-  clearBullets = 1;
   screenShake = 0;
   slowDown = 0; slowValue = 1.0;
+  switch(levelID) {
+  default:
+    ghost1.reset();
+    break;
+  }
 }
 
 void resetGamePlus() {
@@ -173,7 +184,7 @@ void play(int levelID) {
 	if(inMenuScreen) {
 	  if(reset) {
 	    resetGamePlus();
-	    resetGame(&enemy, &yenisei);
+	    resetGame(&enemy, &yenisei, levelID);
 	    gTuvaMap.loadFromFile("resources/floor_tiles/tuvamap.png");
 	  }
 
@@ -212,7 +223,7 @@ void play(int levelID) {
 	    case 1: enemy = saucer; break;
 	    }
 	    resetGamePlus();
-	    resetGame(&enemy, &yenisei);
+	    resetGame(&enemy, &yenisei, levelID);
 	    gBattleSong = Mix_LoadMUS("resources/music/battlesong.ogg");
 	  }
 

@@ -27,4 +27,4 @@ LTexture gBackground; LTexture gBackgroundSup;
 LTexture gFloor; LTexture gFloorSup;
 LTexture gLevel1Background, gForestBackground, gIceBackground;
 LTexture gLevel1Floor, gForestFloor;
-LTexture gDesertTile, gDesertTile1, gDesertTower, gBackgroundMoon, gIceTile, gIceTile1, gIceTile2;
+LTexture gMountainBack, gMountainFront, gMountainClouds, gDesertTile, gDesertTile1, gDesertTower, gBackgroundMoon, gIceTile, gIceTile1, gIceTile2;

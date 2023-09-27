@@ -6,6 +6,7 @@
 bool clearBullets;
 
 Projectile projectile2, projectile3, projectile4, projectile5, saucerProjectile, starProjectile1, snowflakeProjectile, shardProjectile, soundProjectile, daggerProjectile, projectileHG;
+Projectile projectile2Comp[NUM_COMPS];
 
 SDL_Rect laserBoxes[NUM_PROJECTILES];
 
@@ -23,6 +24,8 @@ Projectile::Projectile() {
   shardProjectile.setVariables(7, 7, 6.0, 10, &gShardBullet, 0, 25, 25, false);
   soundProjectile.setVariables(15, 15, 6.0, 10, &gSoundBullet, 0, 25, 25);
   daggerProjectile.setVariables(5, 5, 6.0, 10, &gDaggerBullet, 0, 25, 25, true);
+  //for(int i = 0; i < NUM_COMPS; i++)
+  //  projectile2Comp[i].setVariables(5, 5, 7.0, 30, &gBullet2, 0, 10, 10);
 }
 
 void Projectile::setProj(SDL_Rect box, double x, double y, double spd, bool isLong) {
@@ -356,7 +359,7 @@ void Projectile::moveGravity(double x, double y, double acc, bool moveX) {
   dy += acc*gravityTicks;
 }
 
-void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, double startingAngle, int batch, double spd, bool rotate, bool angleTarget, double slow, bool shootBool) {
+void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum enemyID, int number, double sectionAngle, double startingAngle, int batch, double spd, bool rotate, bool angleTarget, double slow, bool shootBool, bool enemyDead) {
   defaultPosX = x; defaultPosY = y;
 
   if(clearBullets)
@@ -673,7 +676,7 @@ void Projectile::shootEnemy0(double x, double y, Chara* hildegarde, enemyIDEnum 
     else if(difficulty == 2)
       actualIntv = number;
 
-    if(projectileTicks % actualIntv == 0 || shootBool) {
+    if((projectileTicks % actualIntv == 0 || shootBool) && !enemyDead) {
       for(int i = 0; i < batch; i++) {
 	//printf("enemyshot %i\n", projectilesShot);
 	projs[projectilesShot]->posX = defaultPosX;

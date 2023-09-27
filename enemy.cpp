@@ -14,9 +14,14 @@ Enemy::Enemy() {
 	posY = defaultPosY;
 	mBox.x = posX;
 	mBox.y = posY;
+	enemyDead = 0;
 	randX = posX; randY = SCREEN_HEIGHT/6;
-	mCurrentHitPoints = 100;
+	moveX = 0; moveY = 0;
+	actionTicks = 0;
 	mMaxHitPoints = 100;
+	switchMove = 0; changeMove = 1;
+	dx = 0; dy = 0;
+	
 	enemy1.set(&gEnemy1Texture, conradID, 107, 97, 1);
 	saucer.set(&gSaucerTexture, saucerID, 107, 97, 1);
 	hyacinthe.set(&gHyacintheTexture, hyacintheID, 37, 64, 2);
@@ -28,7 +33,9 @@ Enemy::Enemy() {
 	troubadour.setClips(troubadour.mBox.w, troubadour.mBox.h);
 	bohemond.setClips(bohemond.mBox.w, bohemond.mBox.h);
 
-	ghost1.set(&gGhost1Texture, ghost1ID, 51, 51, 1);
+	ghost1.set(&gGhost1Texture, ghost1ID, 25, 25, 1);
+	ghost1.mMaxHitPoints = 10;
+	mCurrentHitPoints = mMaxHitPoints;
 }
 
 void Enemy::setClips(int w, int h) {
@@ -40,7 +47,7 @@ void Enemy::setClips(int w, int h) {
   }
 }
 
-void Enemy::setComp(SDL_Rect box, double x, double y, enemyIDEnum id, LTexture* gTexture) {
+void Enemy::setComp(SDL_Rect box, double x, double y, enemyIDEnum id, LTexture* gTexture, int hitpoints) {
   posX = x;
   posY = y;
   mBox.x = posX;
@@ -51,6 +58,8 @@ void Enemy::setComp(SDL_Rect box, double x, double y, enemyIDEnum id, LTexture* 
   defaultPosY = posY;
   enemyID = id;
   gEnemyTexture = gTexture;
+  mMaxHitPoints = hitpoints;
+  mCurrentHitPoints = mMaxHitPoints;
 }
 
 SDL_Rect Enemy::getBox() {
@@ -147,7 +156,8 @@ void Enemy::createComps(int num, double x, double y) { //companions
   if(!createdComps) {
     for(int i = 0; i < num; i++) {
       companions[i] = new Enemy();
-      companions[i]->setComp(mBox, x, y, enemyID, gEnemyTexture);
+      companions[i]->setComp(mBox, x, y, enemyID, gEnemyTexture, mMaxHitPoints);
+      deallocated[i] = false;
     }
     //printf("created bullets #%i, %i, %i\n", num, mBox.w, mBox.h);
     createdComps = 1;
@@ -157,14 +167,18 @@ void Enemy::createComps(int num, double x, double y) { //companions
 void Enemy::createSingleComp(int num, double x, double y) {
   if(!createdComps) {
     companions[num] = new Enemy();
-    companions[num]->setComp(mBox, x, y, enemyID, gEnemyTexture);
+    companions[num]->setComp(mBox, x, y, enemyID, gEnemyTexture, mMaxHitPoints);
+    deallocated[num] = false;
   }
 }
 
 void Enemy::destroyComps(int num) {
   for(int i = 0; i < num; i++) {
     //projs[i]->clearProjectilesPlus();
-    delete companions[i];
+    if(!deallocated[i]) {
+      delete companions[i];
+      deallocated[i] = true;
+    }
   }
   //printf("deleted bullet #%i\n", num);
   createdComps = 0;
@@ -173,7 +187,7 @@ void Enemy::destroyComps(int num) {
 void Enemy::renewComp(int num) {
   delete companions[num];
   companions[num] = new Enemy();
-  companions[num]->setComp(mBox, posX, posY, enemyID, gEnemyTexture);
+  companions[num]->setComp(mBox, posX, posY, enemyID, gEnemyTexture, mMaxHitPoints);
 }
 
 void Enemy::showTime() {

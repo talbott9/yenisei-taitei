@@ -1,7 +1,7 @@
 #include "background.h"
 
 Background background;
-Background desertTile, desertTile1, desertTower, backgroundMoon, iceTile, iceTile1, iceTile2;
+Background mountainFloor, mountainBackground, mountainBack, mountainClouds, mountainFront, desertTile, desertTile1, desertTower, backgroundMoon, iceTile, iceTile1, iceTile2;
 
 
 Background::Background() {
@@ -27,6 +27,17 @@ Background::Background() {
 	iceTile1.renderVertically = 0;
 	iceTile2.mBox = iceTile.mBox;
 	iceTile2.gTexture = gIceTile2;
+
+	mountainBackground.gTexture = gLevel1Background;
+	mountainBackground.mBox = {0, 0, 1020, 600};
+	mountainFront.gTexture = gMountainFront;
+	mountainFront.mBox = {0, 0, 1020, 600};
+	mountainBack.gTexture = gMountainBack;
+	mountainBack.mBox = {0,0, 1020, 600};
+	mountainClouds.gTexture = gMountainClouds;
+	mountainClouds.mBox = {0,0, 1020, 600};
+	mountainFloor.gTexture = gLevel1Floor;
+	mountainFloor.mBox = {0, 0, 50, 80};
 
 	backgroundColor = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
 }
@@ -109,11 +120,32 @@ void Background::render(SDL_Rect& camera, int levelID) {
 
 	  break;
 	default:
-	  gFloor = gLevel1Floor;	
-	  gFloorSup = gLevel1Floor;	
-	  gBackground = gLevel1Background;	
-	  gBackgroundSup = gLevel1Background;
-	  renderBackground();
+
+	  mountainBackground.renderTiles(camera.x - 100, camera.y, 2);
+	  mountainClouds.renderTiles(mountainClouds.mBox.x - camera.x, mountainClouds.mBox.y - camera.y, 2);
+	  mountainBack.renderTiles(mountainBack.mBox.x - camera.x, mountainBack.mBox.y - camera.y, 2);
+	  mountainFront.renderTiles(mountainFront.mBox.x - camera.x, mountainFront.mBox.y - camera.y, 2);
+	  mountainFloor.renderTiles(mountainFloor.mBox.x - camera.x, camera.h - mountainFloor.mBox.h - camera.y, 50);
+
+	  if(backgroundTicks % 1 == 0)
+	    mountainFront.mBox.x -= 2/intvFloor;
+	  if(mountainFront.mBox.x <= -mountainFront.mBox.w)
+	    mountainFront.mBox.x = 0;
+
+	  if(backgroundTicks % 1 == 0) {
+	    mountainBack.mBox.x -= 1/intvFloor;
+	    mountainFloor.mBox.x -= 5/intvFloor;
+	  }
+	  if(backgroundTicks % 20 == 0) {
+	    mountainClouds.mBox.x -= 1/intvFloor;
+	  }
+	  
+	  if(mountainClouds.mBox.x <= -mountainClouds.mBox.w)
+	    mountainClouds.mBox.x = 0;
+	  if(mountainBack.mBox.x <= -mountainBack.mBox.w)
+	    mountainBack.mBox.x = 0;
+	  if(mountainFloor.mBox.x <= -mountainFloor.mBox.w)
+	    mountainFloor.mBox.x = 0;
 	  break;
 	}
 }
